@@ -232,6 +232,21 @@ router.get('/client-performance', async (req, res) => {
   }
 });
 
+// Interaction type breakdown for dashboard bar chart
+router.get('/interaction-type-summary', async (req, res) => {
+  try {
+    const interactionsByType = await Interaction.aggregate([
+      { $group: { _id: '$type', count: { $sum: 1 } } }
+    ]);
+
+    res.json({ interactionsByType });
+  } catch (error) {
+    console.error('Interaction type summary error:', error);
+    res.status(500).json({ message: 'Error fetching interaction type summary', error: error.message });
+  }
+});
+
+
 module.exports = router;
 // Test route
 router.get("/test", (req, res) => {

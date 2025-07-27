@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 
@@ -7,10 +7,18 @@ import Dashboard from './pages/Dashboard';
 import Clients from './pages/Clients';
 import Interactions from './pages/Interactions';
 import ClientDetail from './pages/ClientDetail';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import SetupTotp from './pages/SetupTotp';
 
+// Auth & Protected Routes
+import { AuthProvider } from './context/AuthContext';
+import AuthContext from './context/AuthContext';
+import PrivateRoute from './components/PrivateRoute';
 
 // Navigation component
 const Navigation = () => {
+  const { logout } = useContext(AuthContext);
   return (
     <nav className="bg-white shadow-lg border-b">
       <div className="max-w-7xl mx-auto px-4">
@@ -50,9 +58,12 @@ const Navigation = () => {
             <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
               Quick Action
             </button>
-            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-              <span className="text-xs font-medium text-gray-600">U</span>
-            </div>
+            <button
+              onClick={logout}
+              className="bg-gray-200 hover:bg-gray-300 text-sm text-gray-700 px-3 py-1 rounded"
+            >
+              Logout
+            </button>
           </div>
         </div>
       </div>
@@ -60,23 +71,41 @@ const Navigation = () => {
   );
 };
 
-// Main App component
+const AppLayout = () => {
+  const { user } = useContext(AuthContext);
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {user && <Navigation />}
+      <main className="max-w-7xl mx-auto">
+        <Routes>
+          <Route 
+            path="/" 
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            } 
+          />
+          <Route path="/dashboard" element={<Navigate to="/" replace />} />
+          <Route path="/clients" element={<PrivateRoute><Clients /></PrivateRoute>} />
+          <Route path="/interactions" element={<PrivateRoute><Interactions /></PrivateRoute>} />
+          <Route path="/clients/:id" element={<PrivateRoute><ClientDetail /></PrivateRoute>} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/setup-totp" element={<SetupTotp />} />
+        </Routes>
+      </main>
+    </div>
+  );
+};
+
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Navigation />
-        <main className="max-w-7xl mx-auto">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/dashboard" element={<Navigate to="/" replace />} />
-            <Route path="/clients" element={<Clients />} />
-            <Route path="/interactions" element={<Interactions />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-            <Route path="/clients/:id" element={<ClientDetail />} />
-          </Routes>
-        </main>
-      </div>
+      <AuthProvider>
+        <AppLayout />
+      </AuthProvider>
     </Router>
   );
 }

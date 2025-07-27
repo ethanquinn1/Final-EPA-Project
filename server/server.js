@@ -37,6 +37,7 @@ app.use('/api/clients', require('./routes/clients'));
 app.use('/api/interactions', require('./routes/interactions'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/search', require('./routes/search'));
+app.use('/api/auth', require('./routes/auth'));
 
 
 // Health check endpoint

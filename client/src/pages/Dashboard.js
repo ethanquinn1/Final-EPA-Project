@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  PieChart, Pie, Cell, BarChart, Bar, AreaChart, Area
+  AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, Legend,
+  PieChart, Pie, Cell, BarChart, Bar
 } from 'recharts';
 import GlobalSearch from '../components/GlobalSearch';
 
@@ -37,7 +37,7 @@ const Dashboard = () => {
       const [dashboardRes, trendsRes, statsRes, activityRes] = await Promise.all([
         fetch('/api/analytics/dashboard'),
         fetch(`/api/analytics/engagement-trends?days=${selectedPeriod}`),
-        fetch('/api/analytics/interaction-stats?period=month'),
+        fetch('/api/analytics/interaction-type-summary'),
         fetch('/api/analytics/recent-activity?limit=10')
       ]);
 
@@ -152,15 +152,63 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* AreaChart: Engagement Trends */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
+        <h3 className="text-lg font-semibold mb-4">Engagement Trends</h3>
+        {monthlyTrends.length > 0 ? (
+          <div className="h-64 w-full overflow-x-auto">
+            <AreaChart width={600} height={250} data={monthlyTrends}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Area
+                type="monotone"
+                dataKey="interactions"
+                stroke="#3B82F6"
+                fill="#3B82F6"
+                fillOpacity={0.4}
+                name="Interactions"
+              />
+              <Area
+                type="monotone"
+                dataKey="newClients"
+                stroke="#10B981"
+                fill="#10B981"
+                fillOpacity={0.4}
+                name="New Clients"
+              />
+            </AreaChart>
+          </div>
+        ) : (
+          <div className="text-gray-500 text-sm text-center">No trend data available</div>
+        )}
+      </div>
+
+      {/* BarChart: Interaction Types */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
+        <h3 className="text-lg font-semibold mb-4">Interaction Types</h3>
+        {interactionTypeData.length > 0 ? (
+          <div className="h-64 w-full overflow-x-auto">
+            <BarChart width={600} height={250} data={interactionTypeData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="value" fill="#3B82F6" name="Count" />
+            </BarChart>
+          </div>
+        ) : (
+          <div className="text-gray-500 text-sm text-center">No interaction type data available</div>
+        )}
+      </div>
+
       {/* Global Search Modal */}
       {showSearch && (
         <GlobalSearch onClose={() => setShowSearch(false)} />
       )}
-
-      {/* Additional Sections Placeholder */}
-      <div className="text-sm text-gray-400 text-center mt-10">
-        📊 Chart and graph sections can go here (e.g., Trends, Status Breakdown, etc.)
-      </div>
     </div>
   );
 };
