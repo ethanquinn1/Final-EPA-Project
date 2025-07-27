@@ -1,92 +1,74 @@
 const express = require('express');
-const cors = require('cors');
 const mongoose = require('mongoose');
+const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
 
-// Middleware
+// Enhanced CORS configuration
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true
+  origin: ['http://localhost:3000', 'http://localhost:3001'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Middleware
+app.use(express.json());
+
+// Database connection
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/engage360', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('MongoDB connected successfully');
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
+  }
+};
+
+connectDB();
 
 // Routes
-const clientRoutes = require('./routes/clients');
-const interactionRoutes = require('./routes/interactions');
-const authRoutes = require('./routes/auth');
-const analyticsRoutes = require('./routes/analytics');
-const notificationRoutes = require('./routes/notifications');
-
-app.use('/api/clients', clientRoutes);
-app.use('/api/interactions', interactionRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/notifications', notificationRoutes);
+app.use('/api/clients', require('./routes/clients'));
+app.use('/api/interactions', require('./routes/interactions'));
+app.use('/api/analytics', require('./routes/analytics'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
+  console.log('🏥 Health check requested');
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development',
+    cors: 'enabled'
+  });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Server Error:', err.stack);
+  res.status(500).json({ 
+    message: 'Something went wrong!', 
+    error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
   });
 });
 
 // 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
-// Global error handler
-app.use((error, req, res, next) => {
-  console.error('Global error handler:', error);
-  
-  if (error.name === 'ValidationError') {
-    return res.status(400).json({ 
-      error: 'Validation Error', 
-      details: Object.values(error.errors).map(e => e.message) 
-    });
-  }
-  
-  if (error.name === 'CastError') {
-    return res.status(400).json({ error: 'Invalid ID format' });
-  }
-  
-  if (error.code === 11000) {
-    return res.status(400).json({ error: 'Duplicate entry' });
-  }
-  
-  res.status(500).json({ error: 'Internal server error' });
-});
-
-// Database connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/engage360';
-
-mongoose.connect(MONGODB_URI)
-  .then(() => {
-    console.log('✅ Connected to MongoDB');
-    console.log(`📊 Database: ${mongoose.connection.name}`);
-  })
-  .catch((error) => {
-    console.error('❌ MongoDB connection error:', error);
-    process.exit(1);
-  });
-
-// Graceful shutdown
-process.on('SIGINT', async () => {
-  console.log('\n🔄 Shutting down gracefully...');
-  await mongoose.connection.close();
-  console.log('✅ Database connection closed');
-  process.exit(0);
+app.use((req, res) => {
+  console.log(`❌ Route not found: ${req.method} ${req.path}`);
+  res.status(404).json({ message: 'Route not found' });
 });
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🌐 API available at http://localhost:${PORT}/api`);
-  console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`🌐 CORS enabled for: http://localhost:3000`);
+  console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`📊 Analytics API: http://localhost:${PORT}/api/analytics/dashboard`);
 });

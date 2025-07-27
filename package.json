@@ -1,32 +1,26 @@
 {
   "name": "engage360-crm",
   "version": "1.0.0",
-  "description": "A bespoke CRM system for client engagement tracking",
+  "description": "A comprehensive CRM system with client management, interaction tracking, and analytics",
   "main": "index.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd server && npm run dev",
     "client": "cd client && npm start",
-    "install-all": "npm install && cd client && npm install && cd ../server && npm install"
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start"
   },
-  "repository": {
-    "type": "git",
-    "url": "your-github-repo-url"
-  },
+  "keywords": [
+    "crm",
+    "client-management",
+    "analytics",
+    "react",
+    "nodejs"
+  ],
   "author": "Your Name",
-  "license": "MIT",
+  "license": "ISC",
   "devDependencies": {
     "concurrently": "^7.6.0"
-  },
-  "dependencies": {
-    "bcryptjs": "^3.0.2",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.1",
-    "express": "^5.1.0",
-    "express-validator": "^7.2.1",
-    "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.18.0",
-    "mongoose": "^8.16.5",
-    "nodemon": "^3.1.10"
   }
 }
