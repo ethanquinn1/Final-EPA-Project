@@ -1,304 +1,404 @@
 const express = require('express');
 const router = express.Router();
-const { body, validationResult } = require('express-validator');
+const mongoose = require('mongoose');
 const Client = require('../models/Client');
+const Interaction = require('../models/Interaction');
 
-// Validation middleware
-const validateClient = [
-  body('name').trim().isLength({ min: 1 }).withMessage('Name is required'),
-  body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
-  body('company').trim().isLength({ min: 1 }).withMessage('Company is required'),
-  body('phone').optional().isMobilePhone().withMessage('Valid phone number required'),
-  body('priority').optional().isIn(['low', 'medium', 'high', 'critical']).withMessage('Invalid priority'),
-  body('status').optional().isIn(['active', 'inactive', 'prospect', 'former']).withMessage('Invalid status')
-];
-
-const handleValidationErrors = (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ 
-      message: 'Validation failed',
-      errors: errors.array()
-    });
-  }
-  next();
-};
-
-// @route   GET /api/clients
-// @desc    Get all clients with filtering and pagination
-// @access  Private (would need auth middleware in production)
+// GET /api/clients - Get all clients with optional search and filtering
 router.get('/', async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = 10,
-      status,
-      priority,
-      search,
-      sortBy = 'createdAt',
-      sortOrder = 'desc'
-    } = req.query;
-
-    // Build filter object
-    const filter = { isActive: true };
+    const { search, status, page = 1, limit = 20 } = req.query;
     
-    if (status) filter.status = status;
-    if (priority) filter.priority = priority;
+    let query = {};
     
-    // Add search functionality
+    // Search functionality
     if (search) {
-      filter.$or = [
+      query.$or = [
         { name: { $regex: search, $options: 'i' } },
         { email: { $regex: search, $options: 'i' } },
         { company: { $regex: search, $options: 'i' } }
       ];
     }
-
+    
+    // Status filter
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+    
     // Calculate pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
-    // Build sort object
-    const sort = {};
-    sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
-
-    // Execute query
-    const clients = await Client.find(filter)
-      .sort(sort)
-      .skip(skip)
-      .limit(parseInt(limit))
-      .select('-__v');
-
-    // Get total count for pagination
-    const total = await Client.countDocuments(filter);
-    const totalPages = Math.ceil(total / parseInt(limit));
-
+    // Execute query with pagination
+    const [clients, totalCount] = await Promise.all([
+      Client.find(query)
+        .sort({ updatedAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Client.countDocuments(query)
+    ]);
+    
     res.json({
       clients,
       pagination: {
         currentPage: parseInt(page),
-        totalPages,
-        totalClients: total,
-        hasNext: parseInt(page) < totalPages,
+        totalPages: Math.ceil(totalCount / parseInt(limit)),
+        totalCount,
+        hasNext: skip + clients.length < totalCount,
         hasPrev: parseInt(page) > 1
       }
     });
-
   } catch (error) {
     console.error('Error fetching clients:', error);
-    res.status(500).json({ message: 'Server error while fetching clients' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// @route   GET /api/clients/:id
-// @desc    Get client by ID
-// @access  Private
+// GET /api/clients/:id - Get single client
 router.get('/:id', async (req, res) => {
   try {
-    const client = await Client.findById(req.params.id).select('-__v');
+    const clientId = req.params.id;
     
-    if (!client || !client.isActive) {
-      return res.status(404).json({ message: 'Client not found' });
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(clientId)) {
+      return res.status(400).json({ error: 'Invalid client ID' });
     }
-
+    
+    const client = await Client.findById(clientId);
+    
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+    
     res.json(client);
   } catch (error) {
     console.error('Error fetching client:', error);
-    if (error.name === 'CastError') {
-      return res.status(404).json({ message: 'Client not found' });
-    }
-    res.status(500).json({ message: 'Server error while fetching client' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// @route   POST /api/clients
-// @desc    Create new client
-// @access  Private
-router.post('/', validateClient, handleValidationErrors, async (req, res) => {
+// GET /api/clients/:id/detail - Get detailed client information with interactions and analytics
+router.get('/:id/detail', async (req, res) => {
   try {
-    // Check if client with email already exists
-    const existingClient = await Client.findOne({ 
-      email: req.body.email,
-      isActive: true 
-    });
-
-    if (existingClient) {
-      return res.status(400).json({ 
-        message: 'Client with this email already exists' 
-      });
-    }
-
-    // Create new client
-    const clientData = {
-      ...req.body,
-      assignedTo: 'default-user' // In production, this would come from auth token
-    };
-
-    const client = new Client(clientData);
+    const clientId = req.params.id;
     
-    // Calculate initial engagement score
-    client.calculateEngagementScore();
-    
-    await client.save();
-
-    res.status(201).json({
-      message: 'Client created successfully',
-      client
-    });
-
-  } catch (error) {
-    console.error('Error creating client:', error);
-    res.status(500).json({ message: 'Server error while creating client' });
-  }
-});
-
-// @route   PUT /api/clients/:id
-// @desc    Update client
-// @access  Private
-router.put('/:id', validateClient, handleValidationErrors, async (req, res) => {
-  try {
-    const client = await Client.findById(req.params.id);
-
-    if (!client || !client.isActive) {
-      return res.status(404).json({ message: 'Client not found' });
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(clientId)) {
+      return res.status(400).json({ error: 'Invalid client ID' });
     }
 
-    // Check if email is being changed and if it conflicts
-    if (req.body.email && req.body.email !== client.email) {
-      const existingClient = await Client.findOne({ 
-        email: req.body.email,
-        isActive: true,
-        _id: { $ne: client._id }
-      });
-
-      if (existingClient) {
-        return res.status(400).json({ 
-          message: 'Another client with this email already exists' 
-        });
-      }
+    // Get client information
+    const client = await Client.findById(clientId);
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found' });
     }
 
-    // Update client fields
-    Object.keys(req.body).forEach(key => {
-      if (req.body[key] !== undefined) {
-        client[key] = req.body[key];
-      }
-    });
+    // Get client interactions (sorted by date, most recent first)
+    const interactions = await Interaction.find({ clientId: new mongoose.Types.ObjectId(clientId) })
+      .sort({ date: -1 })
+      .limit(50);
 
-    // Recalculate engagement score
-    client.calculateEngagementScore();
-
-    await client.save();
-
-    res.json({
-      message: 'Client updated successfully',
-      client
-    });
-
-  } catch (error) {
-    console.error('Error updating client:', error);
-    if (error.name === 'CastError') {
-      return res.status(404).json({ message: 'Client not found' });
-    }
-    res.status(500).json({ message: 'Server error while updating client' });
-  }
-});
-
-// @route   DELETE /api/clients/:id
-// @desc    Soft delete client
-// @access  Private
-router.delete('/:id', async (req, res) => {
-  try {
-    const client = await Client.findById(req.params.id);
-
-    if (!client || !client.isActive) {
-      return res.status(404).json({ message: 'Client not found' });
-    }
-
-    // Soft delete
-    client.isActive = false;
-    await client.save();
-
-    res.json({ message: 'Client deleted successfully' });
-
-  } catch (error) {
-    console.error('Error deleting client:', error);
-    if (error.name === 'CastError') {
-      return res.status(404).json({ message: 'Client not found' });
-    }
-    res.status(500).json({ message: 'Server error while deleting client' });
-  }
-});
-
-// @route   POST /api/clients/:id/calculate-engagement
-// @desc    Recalculate engagement score for a client
-// @access  Private
-router.post('/:id/calculate-engagement', async (req, res) => {
-  try {
-    const client = await Client.findById(req.params.id);
-
-    if (!client || !client.isActive) {
-      return res.status(404).json({ message: 'Client not found' });
-    }
-
-    const newScore = client.calculateEngagementScore();
-    await client.save();
-
-    res.json({
-      message: 'Engagement score updated',
-      engagementScore: newScore
-    });
-
-  } catch (error) {
-    console.error('Error calculating engagement score:', error);
-    if (error.name === 'CastError') {
-      return res.status(404).json({ message: 'Client not found' });
-    }
-    res.status(500).json({ message: 'Server error while calculating engagement score' });
-  }
-});
-
-// @route   GET /api/clients/stats/summary
-// @desc    Get client statistics summary
-// @access  Private
-router.get('/stats/summary', async (req, res) => {
-  try {
-    const stats = await Client.aggregate([
-      { $match: { isActive: true } },
+    // Get engagement score history (last 12 months)
+    const engagementHistory = await Interaction.aggregate([
+      { $match: { clientId: new mongoose.Types.ObjectId(clientId) } },
       {
         $group: {
-          _id: null,
-          totalClients: { $sum: 1 },
-          activeClients: {
-            $sum: { $cond: [{ $eq: ['$status', 'active'] }, 1, 0] }
+          _id: {
+            year: { $year: '$date' },
+            month: { $month: '$date' }
           },
-          prospects: {
-            $sum: { $cond: [{ $eq: ['$status', 'prospect'] }, 1, 0] }
-          },
-          averageEngagementScore: { $avg: '$engagementScore' },
-          highPriorityClients: {
-            $sum: { $cond: [{ $eq: ['$priority', 'high'] }, 1, 0] }
-          },
-          criticalPriorityClients: {
-            $sum: { $cond: [{ $eq: ['$priority', 'critical'] }, 1, 0] }
-          }
+          avgScore: { $avg: '$priority' },
+          interactionCount: { $sum: 1 }
         }
-      }
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } },
+      { $limit: 12 }
     ]);
 
-    const summary = stats[0] || {
-      totalClients: 0,
-      activeClients: 0,
-      prospects: 0,
-      averageEngagementScore: 0,
-      highPriorityClients: 0,
-      criticalPriorityClients: 0
-    };
+    // Get interaction type breakdown
+    const interactionTypeStats = await Interaction.aggregate([
+      { $match: { clientId: new mongoose.Types.ObjectId(clientId) } },
+      { $group: { _id: '$type', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
 
-    res.json(summary);
+    // Get upcoming follow-ups
+    const upcomingFollowUps = await Interaction.find({
+      clientId: new mongoose.Types.ObjectId(clientId),
+      followUpDate: { $gte: new Date() },
+      outcome: { $ne: 'completed' }
+    }).sort({ followUpDate: 1 });
 
+    // Get overdue follow-ups
+    const overdueFollowUps = await Interaction.find({
+      clientId: new mongoose.Types.ObjectId(clientId),
+      followUpDate: { $lt: new Date() },
+      outcome: { $ne: 'completed' }
+    }).sort({ followUpDate: 1 });
+
+    // Combine upcoming and overdue
+    const allFollowUps = [...overdueFollowUps, ...upcomingFollowUps];
+
+    res.json({
+      client,
+      interactions,
+      engagementHistory,
+      interactionTypeStats,
+      upcomingFollowUps: allFollowUps,
+      analytics: {
+        totalInteractions: interactions.length,
+        avgPriority: interactions.length > 0 ? 
+          interactions.reduce((sum, i) => sum + i.priority, 0) / interactions.length : 0,
+        lastInteraction: interactions.length > 0 ? interactions[0].date : null,
+        pendingFollowUps: allFollowUps.length,
+        overdueFollowUps: overdueFollowUps.length,
+        recentActivity: interactions.filter(i => 
+          new Date(i.date) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+        ).length
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching client detail:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/clients - Create new client
+router.post('/', async (req, res) => {
+  try {
+    const { name, email, phone, company, status, tags, notes } = req.body;
+    
+    // Validation
+    if (!name || !email) {
+      return res.status(400).json({ error: 'Name and email are required' });
+    }
+    
+    // Check if email already exists
+    const existingClient = await Client.findOne({ email });
+    if (existingClient) {
+      return res.status(400).json({ error: 'Client with this email already exists' });
+    }
+    
+    // Create new client
+    const client = new Client({
+      name,
+      email,
+      phone,
+      company: company || name, // Default company to name if not provided
+      status: status || 'prospect',
+      engagementScore: 50, // Default starting score
+      tags: tags || [],
+      notes
+    });
+    
+    await client.save();
+    
+    res.status(201).json(client);
+  } catch (error) {
+    console.error('Error creating client:', error);
+    if (error.code === 11000) {
+      // Duplicate key error
+      res.status(400).json({ error: 'Client with this email already exists' });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+});
+
+// PUT /api/clients/:id - Update client
+router.put('/:id', async (req, res) => {
+  try {
+    const clientId = req.params.id;
+    const updates = req.body;
+    
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(clientId)) {
+      return res.status(400).json({ error: 'Invalid client ID' });
+    }
+    
+    // Remove fields that shouldn't be updated directly
+    delete updates._id;
+    delete updates.createdAt;
+    delete updates.updatedAt;
+    
+    // If email is being updated, check for duplicates
+    if (updates.email) {
+      const existingClient = await Client.findOne({ 
+        email: updates.email, 
+        _id: { $ne: clientId } 
+      });
+      if (existingClient) {
+        return res.status(400).json({ error: 'Client with this email already exists' });
+      }
+    }
+    
+    const client = await Client.findByIdAndUpdate(
+      clientId,
+      updates,
+      { new: true, runValidators: true }
+    );
+    
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+    
+    res.json(client);
+  } catch (error) {
+    console.error('Error updating client:', error);
+    if (error.code === 11000) {
+      res.status(400).json({ error: 'Client with this email already exists' });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+});
+
+// PATCH /api/clients/:id/engagement-score - Update engagement score
+router.patch('/:id/engagement-score', async (req, res) => {
+  try {
+    const clientId = req.params.id;
+    const { score } = req.body;
+    
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(clientId)) {
+      return res.status(400).json({ error: 'Invalid client ID' });
+    }
+    
+    // Validate score
+    if (typeof score !== 'number' || score < 0 || score > 100) {
+      return res.status(400).json({ error: 'Score must be a number between 0 and 100' });
+    }
+    
+    const client = await Client.findByIdAndUpdate(
+      clientId,
+      { engagementScore: score },
+      { new: true }
+    );
+    
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+    
+    res.json({ message: 'Engagement score updated', client });
+  } catch (error) {
+    console.error('Error updating engagement score:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// DELETE /api/clients/:id - Delete client
+router.delete('/:id', async (req, res) => {
+  try {
+    const clientId = req.params.id;
+    
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(clientId)) {
+      return res.status(400).json({ error: 'Invalid client ID' });
+    }
+    
+    // Check if client exists
+    const client = await Client.findById(clientId);
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+    
+    // Delete all associated interactions
+    await Interaction.deleteMany({ clientId: new mongoose.Types.ObjectId(clientId) });
+    
+    // Delete the client
+    await Client.findByIdAndDelete(clientId);
+    
+    res.json({ message: 'Client and associated interactions deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting client:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/clients/:id/interactions - Get all interactions for a specific client
+router.get('/:id/interactions', async (req, res) => {
+  try {
+    const clientId = req.params.id;
+    const { page = 1, limit = 20, type, outcome } = req.query;
+    
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(clientId)) {
+      return res.status(400).json({ error: 'Invalid client ID' });
+    }
+    
+    // Check if client exists
+    const client = await Client.findById(clientId);
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+    
+    let query = { clientId: new mongoose.Types.ObjectId(clientId) };
+    
+    // Add filters
+    if (type) query.type = type;
+    if (outcome) query.outcome = outcome;
+    
+    // Calculate pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // Get interactions with pagination
+    const [interactions, totalCount] = await Promise.all([
+      Interaction.find(query)
+        .sort({ date: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Interaction.countDocuments(query)
+    ]);
+    
+    res.json({
+      interactions,
+      client: { name: client.name, company: client.company },
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalCount / parseInt(limit)),
+        totalCount,
+        hasNext: skip + interactions.length < totalCount,
+        hasPrev: parseInt(page) > 1
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching client interactions:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/clients/stats/overview - Get client statistics overview
+router.get('/stats/overview', async (req, res) => {
+  try {
+    const [
+      totalClients,
+      clientsByStatus,
+      recentClients,
+      topClients
+    ] = await Promise.all([
+      Client.countDocuments(),
+      Client.aggregate([
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
+      ]),
+      Client.find()
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select('name company status createdAt'),
+      Client.find()
+        .sort({ engagementScore: -1 })
+        .limit(5)
+        .select('name company engagementScore')
+    ]);
+    
+    res.json({
+      totalClients,
+      clientsByStatus,
+      recentClients,
+      topClients
+    });
   } catch (error) {
     console.error('Error fetching client stats:', error);
-    res.status(500).json({ message: 'Server error while fetching statistics' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

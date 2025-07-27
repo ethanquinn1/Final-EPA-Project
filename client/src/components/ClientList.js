@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { clientAPI } from '../services/api';
 
 const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
@@ -11,7 +12,6 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState({});
 
-  // Fetch clients from API
   const fetchClients = async () => {
     try {
       setLoading(true);
@@ -23,7 +23,6 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
         priority: priorityFilter,
       };
 
-      // Remove empty parameters
       Object.keys(params).forEach(key => {
         if (params[key] === '') delete params[key];
       });
@@ -40,17 +39,15 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
     }
   };
 
-  // Fetch clients when component mounts or filters change
   useEffect(() => {
     fetchClients();
   }, [currentPage, searchTerm, statusFilter, priorityFilter]);
 
-  // Handle client deletion
   const handleDelete = async (clientId) => {
     if (window.confirm('Are you sure you want to delete this client?')) {
       try {
         await clientAPI.deleteClient(clientId);
-        fetchClients(); // Refresh the list
+        fetchClients();
       } catch (err) {
         setError('Failed to delete client. Please try again.');
         console.error('Error deleting client:', err);
@@ -58,7 +55,6 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
     }
   };
 
-  // Get status badge color
   const getStatusColor = (status) => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800';
@@ -69,7 +65,6 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
     }
   };
 
-  // Get priority badge color
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 'critical': return 'bg-red-100 text-red-800';
@@ -80,7 +75,6 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
     }
   };
 
-  // Format date
   const formatDate = (dateString) => {
     if (!dateString) return 'Never';
     return new Date(dateString).toLocaleDateString();
@@ -160,32 +154,18 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
         </div>
       )}
 
-      {/* Client List */}
+      {/* Client Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Client
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Company
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Priority
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Last Contact
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Engagement
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Contact</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Engagement</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -211,15 +191,11 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {client.name}
-                      </div>
+                      <div className="text-sm font-medium text-gray-900">{client.name}</div>
                       <div className="text-sm text-gray-500">{client.email}</div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {client.company}
-                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{client.company}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(client.status)}`}>
                       {client.status}
@@ -245,6 +221,13 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <Link
+                      to={`/clients/${client._id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-blue-600 hover:text-blue-800 mr-2"
+                    >
+                      View Details
+                    </Link>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

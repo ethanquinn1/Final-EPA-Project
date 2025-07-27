@@ -1,189 +1,165 @@
 import React, { useState, useEffect } from 'react';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { analyticsAPI } from '../services/analyticsAPI';
-import FollowUpDashboard from '../components/FollowUpDashboard';
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  PieChart, Pie, Cell, BarChart, Bar, AreaChart, Area
+} from 'recharts';
+import GlobalSearch from '../components/GlobalSearch';
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [engagementTrends, setEngagementTrends] = useState([]);
   const [interactionStats, setInteractionStats] = useState([]);
-  const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [selectedPeriod, setSelectedPeriod] = useState('month');
+  const [selectedPeriod, setSelectedPeriod] = useState('30');
+  const [showSearch, setShowSearch] = useState(false);
+  const [recentActivity, setRecentActivity] = useState([]);
+
+  const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
   useEffect(() => {
-    loadDashboardData();
+    fetchDashboardData();
   }, [selectedPeriod]);
 
-  const loadDashboardData = async () => {
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowSearch(true);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const fetchDashboardData = async () => {
     try {
       setLoading(true);
+      const [dashboardRes, trendsRes, statsRes, activityRes] = await Promise.all([
+        fetch('/api/analytics/dashboard'),
+        fetch(`/api/analytics/engagement-trends?days=${selectedPeriod}`),
+        fetch('/api/analytics/interaction-stats?period=month'),
+        fetch('/api/analytics/recent-activity?limit=10')
+      ]);
+
       const [dashboard, trends, stats, activity] = await Promise.all([
-        analyticsAPI.getDashboardData(),
-        analyticsAPI.getEngagementTrends(30),
-        analyticsAPI.getInteractionStats(selectedPeriod),
-        analyticsAPI.getRecentActivity(10)
+        dashboardRes.json(),
+        trendsRes.json(),
+        statsRes.json(),
+        activityRes.json()
       ]);
 
       setDashboardData(dashboard);
       setEngagementTrends(trends);
       setInteractionStats(stats);
       setRecentActivity(activity);
-    } catch (err) {
-      setError('Failed to load dashboard data');
-      console.error('Dashboard error:', err);
+
+      console.log('📊 dashboardData:', dashboard);
+      console.log('📈 engagementTrends:', trends);
+      console.log('📞 interactionStats:', stats);
+      console.log('📦 Full dashboardData:', JSON.stringify(dashboard, null, 2));
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const formatStatsByPeriod = (stats) => {
-    return stats.map(stat => {
-      let label = '';
-      if (selectedPeriod === 'week') {
-        label = `W${stat._id.week} ${stat._id.year}`;
-      } else if (selectedPeriod === 'month') {
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        label = `${months[stat._id.month - 1]} ${stat._id.year}`;
-      } else if (selectedPeriod === 'quarter') {
-        label = `Q${stat._id.quarter} ${stat._id.year}`;
-      }
-      
-      return {
-        period: label,
-        total: stat.totalInteractions,
-        emails: stat.emails,
-        meetings: stat.meetings,
-        calls: stat.calls,
-        notes: stat.notes,
-        avgPriority: Math.round(stat.avgPriority * 20)
-      };
-    });
-  };
-
-  const formatEngagementDistribution = () => {
-    if (!dashboardData?.engagement?.distribution) return [];
-    
-    return dashboardData.engagement.distribution.map((bucket, index) => {
-      const ranges = ['0-20', '20-40', '40-60', '60-80', '80-100'];
-      return {
-        name: ranges[index] || 'Other',
-        value: bucket.count,
-        color: `hsl(${index * 60}, 70%, 50%)`
-      };
-    });
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
-  if (error) {
+  if (!dashboardData) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-md p-4">
-        <div className="text-red-800">{error}</div>
-        <button 
-          onClick={loadDashboardData}
-          className="mt-2 text-red-600 hover:text-red-800 underline"
-        >
-          Retry
-        </button>
+      <div className="text-center text-gray-600 py-10">
+        <h2 className="text-xl font-semibold">Dashboard unavailable</h2>
+        <p>Data could not be loaded. Please try refreshing or check back later.</p>
       </div>
     );
   }
+
+  const clientStatusData = dashboardData.clients?.byStatus?.map(item => ({
+    name: item._id || 'Unknown',
+    value: item.count,
+    percentage: dashboardData.clients.total
+      ? ((item.count / dashboardData.clients.total) * 100).toFixed(1)
+      : 0
+  })) || [];
+
+  const monthlyTrends = engagementTrends?.map(item => ({
+    date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    interactions: item.interactionCount,
+    avgEngagement: item.avgEngagementScore,
+    newClients: item.newClients || 0
+  })) || [];
+
+  const interactionTypeData = interactionStats?.interactionsByType?.map(item => ({
+    name: item._id.charAt(0).toUpperCase() + item._id.slice(1),
+    value: item.count
+  })) || [];
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <div className="flex space-x-2">
+    <div className="max-w-7xl mx-auto p-4 lg:p-6">
+      {/* Header Section */}
+      <div className="flex flex-col lg:flex-row justify-between items-start gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-sm text-gray-500">Overview of CRM performance</p>
+        </div>
+        <div className="flex items-center gap-3">
           <select
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border rounded px-2 py-1 text-sm"
           >
-            <option value="week">Weekly</option>
-            <option value="month">Monthly</option>
-            <option value="quarter">Quarterly</option>
+            <option value="7">Last 7 Days</option>
+            <option value="30">Last 30 Days</option>
+            <option value="90">Last 90 Days</option>
           </select>
+          <button
+            onClick={fetchDashboardData}
+            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+          >
+            Refresh
+          </button>
         </div>
       </div>
 
-      {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Clients</p>
-              <p className="text-3xl font-bold text-gray-900">{dashboardData?.clients?.total || 0}</p>
-            </div>
-            <div className="p-3 bg-blue-100 rounded-full">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.196-2.121M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.196-2.121M7 20v-2m3-7a3 3 0 110-6 3 3 0 010 6m4 0a3 3 0 110-6 3 3 0 010 6" />
-              </svg>
-            </div>
-          </div>
+      {/* Metric Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white p-4 shadow rounded border text-center">
+          <p className="text-sm text-gray-500">Total Clients</p>
+          <p className="text-2xl font-bold">{dashboardData.clients?.total ?? '–'}</p>
         </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Interactions</p>
-              <p className="text-3xl font-bold text-gray-900">{dashboardData?.interactions?.total || 0}</p>
-            </div>
-            <div className="p-3 bg-green-100 rounded-full">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-            </div>
-          </div>
+        <div className="bg-white p-4 shadow rounded border text-center">
+          <p className="text-sm text-gray-500">Total Interactions</p>
+          <p className="text-2xl font-bold">{dashboardData.interactions?.total ?? '–'}</p>
         </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Follow-ups Due</p>
-              <p className="text-3xl font-bold text-gray-900">{dashboardData?.followUps?.due || 0}</p>
-            </div>
-            <div className="p-3 bg-yellow-100 rounded-full">
-              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
+        <div className="bg-white p-4 shadow rounded border text-center">
+          <p className="text-sm text-gray-500">Follow-ups Due</p>
+          <p className="text-2xl font-bold">{dashboardData.followUps?.due ?? '–'}</p>
         </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Overdue Follow-ups</p>
-              <p className="text-3xl font-bold text-red-600">{dashboardData?.followUps?.overdue || 0}</p>
-            </div>
-            <div className="p-3 bg-red-100 rounded-full">
-              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-            </div>
-          </div>
+        <div className="bg-white p-4 shadow rounded border text-center">
+          <p className="text-sm text-gray-500">Avg Engagement</p>
+          <p className="text-2xl font-bold">
+            {dashboardData.engagement?.avgScore !== undefined
+              ? dashboardData.engagement.avgScore.toFixed(1)
+              : '–'}
+          </p>
         </div>
       </div>
 
-      {/* Follow-up Management Section */}
-      <div className="mb-6">
-        <FollowUpDashboard />
-      </div>
+      {/* Global Search Modal */}
+      {showSearch && (
+        <GlobalSearch onClose={() => setShowSearch(false)} />
+      )}
 
-      {/* Success Message */}
-      <div className="bg-green-50 border border-green-200 rounded-md p-4">
-        <div className="text-green-800">
-          🎉 <strong>Dashboard is now working!</strong> You can now add clients and interactions to see more data and charts.
-        </div>
+      {/* Additional Sections Placeholder */}
+      <div className="text-sm text-gray-400 text-center mt-10">
+        📊 Chart and graph sections can go here (e.g., Trends, Status Breakdown, etc.)
       </div>
     </div>
   );

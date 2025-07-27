@@ -6,6 +6,8 @@ import './App.css';
 import Dashboard from './pages/Dashboard';
 import Clients from './pages/Clients';
 import Interactions from './pages/Interactions';
+import ClientDetail from './pages/ClientDetail';
+
 
 // Navigation component
 const Navigation = () => {
@@ -71,6 +73,7 @@ function App() {
             <Route path="/clients" element={<Clients />} />
             <Route path="/interactions" element={<Interactions />} />
             <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/clients/:id" element={<ClientDetail />} />
           </Routes>
         </main>
       </div>
