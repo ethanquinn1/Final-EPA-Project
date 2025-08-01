@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import './App.css';
 
 // Import pages
@@ -16,9 +16,9 @@ import { AuthProvider } from './context/AuthContext';
 import AuthContext from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 
-// Navigation component
 const Navigation = () => {
   const { logout } = useContext(AuthContext);
+  
   return (
     <nav className="bg-white shadow-lg border-b">
       <div className="max-w-7xl mx-auto px-4">
@@ -28,30 +28,27 @@ const Navigation = () => {
               <h1 className="text-xl font-bold text-gray-900">Engage360 CRM</h1>
             </div>
             <div className="flex space-x-6">
-              <a 
-                href="/" 
+              <Link 
+                to="/" 
                 className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent hover:border-blue-600 transition-colors"
               >
                 Dashboard
-              </a>
-              <a 
-                href="/clients" 
+              </Link>
+              <Link 
+                to="/clients" 
                 className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent hover:border-blue-600 transition-colors"
               >
                 Clients
-              </a>
-              <a 
-                href="/interactions" 
+              </Link>
+              <Link 
+                to="/interactions" 
                 className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent hover:border-blue-600 transition-colors"
               >
                 Interactions
-              </a>
-              <a 
-                href="#" 
-                className="text-gray-400 px-3 py-2 rounded-md text-sm font-medium cursor-not-allowed"
-              >
+              </Link>
+              <span className="text-gray-400 px-3 py-2 rounded-md text-sm font-medium cursor-not-allowed">
                 Analytics (Coming Soon)
-              </a>
+              </span>
             </div>
           </div>
           <div className="flex items-center space-x-4">
@@ -73,11 +70,18 @@ const Navigation = () => {
 
 const AppLayout = () => {
   const { user } = useContext(AuthContext);
+  
   return (
     <div className="min-h-screen bg-gray-50">
       {user && <Navigation />}
       <main className="max-w-7xl mx-auto">
         <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/setup-totp" element={<SetupTotp />} />
+          
+          {/* Protected routes */}
           <Route 
             path="/" 
             element={
@@ -90,10 +94,9 @@ const AppLayout = () => {
           <Route path="/clients" element={<PrivateRoute><Clients /></PrivateRoute>} />
           <Route path="/interactions" element={<PrivateRoute><Interactions /></PrivateRoute>} />
           <Route path="/clients/:id" element={<PrivateRoute><ClientDetail /></PrivateRoute>} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          
+          {/* Catch-all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
-          <Route path="/setup-totp" element={<SetupTotp />} />
         </Routes>
       </main>
     </div>
