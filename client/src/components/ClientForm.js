@@ -1,7 +1,25 @@
+// 📁 client/src/components/ClientForm.js
+// Your existing functionality with professional styling upgrade
 import React, { useState, useEffect } from 'react';
 import { clientAPI } from '../services/api';
+import { 
+  X, 
+  User, 
+  Mail, 
+  Phone, 
+  Building, 
+  MapPin, 
+  Calendar, 
+  DollarSign,
+  Link,
+  FileText,
+  Tag,
+  Save,
+  AlertCircle
+} from 'lucide-react';
 
 const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
+  // KEEP: All your existing state exactly as is
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -31,7 +49,7 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Populate form when editing existing client
+  // KEEP: Your existing useEffect exactly as is
   useEffect(() => {
     if (client) {
       setFormData({
@@ -61,7 +79,6 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
         }
       });
     } else {
-      // Reset form for new client
       setFormData({
         name: '',
         email: '',
@@ -91,7 +108,7 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
     setErrors({});
   }, [client, isOpen]);
 
-  // Handle form input changes
+  // KEEP: Your existing handleChange function exactly as is
   const handleChange = (e) => {
     const { name, value } = e.target;
     
@@ -111,7 +128,6 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
       }));
     }
 
-    // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -120,7 +136,7 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
     }
   };
 
-  // Validate form
+  // KEEP: Your existing validateForm function exactly as is
   const validateForm = () => {
     const newErrors = {};
 
@@ -150,7 +166,7 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
+  // KEEP: Your existing handleSubmit function exactly as is
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -161,7 +177,6 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
     setLoading(true);
     
     try {
-      // Prepare data for submission
       const submitData = {
         ...formData,
         tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
@@ -169,17 +184,14 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
         nextFollowUpDate: formData.nextFollowUpDate || null,
       };
 
-      // Remove empty address if no fields are filled
       if (!Object.values(submitData.address).some(value => value.trim())) {
         delete submitData.address;
       }
 
       let result;
       if (client) {
-        // Update existing client
         result = await clientAPI.updateClient(client._id, submitData);
       } else {
-        // Create new client
         result = await clientAPI.createClient(submitData);
       }
 
@@ -187,7 +199,6 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
     } catch (error) {
       console.error('Error saving client:', error);
       if (error.response?.data?.errors) {
-        // Handle validation errors from backend
         const backendErrors = {};
         error.response.data.errors.forEach(err => {
           backendErrors[err.path] = err.msg;
@@ -204,39 +215,52 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
-        <div className="mt-3">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-medium text-gray-900">
-              {client ? 'Edit Client' : 'Add New Client'}
-            </h3>
+    <div style={styles.overlay}>
+      <div style={styles.modal}>
+        <div style={styles.container}>
+          {/* Professional Header */}
+          <div style={styles.header}>
+            <div style={styles.headerLeft}>
+              <div style={styles.headerIcon}>
+                <User size={24} color="white" />
+              </div>
+              <div>
+                <h3 style={styles.title}>
+                  {client ? 'Edit Client' : 'Add New Client'}
+                </h3>
+                <p style={styles.subtitle}>
+                  {client ? 'Update client information' : 'Create a new client profile'}
+                </p>
+              </div>
+            </div>
             <button
               onClick={onCancel}
-              className="text-gray-400 hover:text-gray-600"
+              style={styles.closeButton}
             >
-              <span className="sr-only">Close</span>
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X size={24} />
             </button>
           </div>
 
-          {/* General Error */}
+          {/* Professional Error Message */}
           {errors.general && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
-              {errors.general}
+            <div style={styles.errorAlert}>
+              <AlertCircle size={20} />
+              <span>{errors.general}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Basic Information */}
-            <div>
-              <h4 className="text-md font-medium text-gray-900 mb-4">Basic Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+          <form onSubmit={handleSubmit} style={styles.form}>
+            {/* Basic Information Section */}
+            <div style={styles.section}>
+              <div style={styles.sectionHeader}>
+                <User size={20} style={styles.sectionIcon} />
+                <h4 style={styles.sectionTitle}>Basic Information</h4>
+              </div>
+              
+              <div style={styles.grid}>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    <Mail size={16} style={styles.labelIcon} />
                     Name *
                   </label>
                   <input
@@ -244,13 +268,18 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-md ${errors.name ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                    style={{
+                      ...styles.input,
+                      ...(errors.name ? styles.inputError : {})
+                    }}
+                    placeholder="Enter full name"
                   />
-                  {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+                  {errors.name && <p style={styles.errorText}>{errors.name}</p>}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    <Mail size={16} style={styles.labelIcon} />
                     Email *
                   </label>
                   <input
@@ -258,13 +287,18 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-md ${errors.email ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                    style={{
+                      ...styles.input,
+                      ...(errors.email ? styles.inputError : {})
+                    }}
+                    placeholder="Enter email address"
                   />
-                  {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+                  {errors.email && <p style={styles.errorText}>{errors.email}</p>}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    <Phone size={16} style={styles.labelIcon} />
                     Phone
                   </label>
                   <input
@@ -272,13 +306,18 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-md ${errors.phone ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                    style={{
+                      ...styles.input,
+                      ...(errors.phone ? styles.inputError : {})
+                    }}
+                    placeholder="Enter phone number"
                   />
-                  {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
+                  {errors.phone && <p style={styles.errorText}>{errors.phone}</p>}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    <Building size={16} style={styles.labelIcon} />
                     Company *
                   </label>
                   <input
@@ -286,13 +325,18 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
                     name="company"
                     value={formData.company}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-md ${errors.company ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                    style={{
+                      ...styles.input,
+                      ...(errors.company ? styles.inputError : {})
+                    }}
+                    placeholder="Enter company name"
                   />
-                  {errors.company && <p className="mt-1 text-sm text-red-600">{errors.company}</p>}
+                  {errors.company && <p style={styles.errorText}>{errors.company}</p>}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    <User size={16} style={styles.labelIcon} />
                     Position
                   </label>
                   <input
@@ -300,12 +344,14 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
                     name="position"
                     value={formData.position}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    style={styles.input}
+                    placeholder="Enter job title"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    <Building size={16} style={styles.labelIcon} />
                     Industry
                   </label>
                   <input
@@ -313,25 +359,28 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
                     name="industry"
                     value={formData.industry}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    style={styles.input}
+                    placeholder="Enter industry"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Relationship Details */}
-            <div>
-              <h4 className="text-md font-medium text-gray-900 mb-4">Relationship Details</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Status
-                  </label>
+            {/* Relationship Details Section */}
+            <div style={styles.section}>
+              <div style={styles.sectionHeader}>
+                <FileText size={20} style={styles.sectionIcon} />
+                <h4 style={styles.sectionTitle}>Relationship Details</h4>
+              </div>
+              
+              <div style={styles.grid}>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>Status</label>
                   <select
                     name="status"
                     value={formData.status}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    style={styles.select}
                   >
                     <option value="prospect">Prospect</option>
                     <option value="active">Active</option>
@@ -340,15 +389,13 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Priority
-                  </label>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>Priority</label>
                   <select
                     name="priority"
                     value={formData.priority}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    style={styles.select}
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -357,15 +404,13 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Source
-                  </label>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>Source</label>
                   <select
                     name="source"
                     value={formData.source}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    style={styles.select}
                   >
                     <option value="referral">Referral</option>
                     <option value="networking">Networking</option>
@@ -376,15 +421,13 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Preferred Contact Method
-                  </label>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>Preferred Contact Method</label>
                   <select
                     name="preferredContactMethod"
                     value={formData.preferredContactMethod}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    style={styles.select}
                   >
                     <option value="email">Email</option>
                     <option value="phone">Phone</option>
@@ -393,8 +436,9 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    <DollarSign size={16} style={styles.labelIcon} />
                     Client Value ($)
                   </label>
                   <input
@@ -404,13 +448,18 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
                     onChange={handleChange}
                     min="0"
                     step="0.01"
-                    className={`w-full px-3 py-2 border rounded-md ${errors.clientValue ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                    style={{
+                      ...styles.input,
+                      ...(errors.clientValue ? styles.inputError : {})
+                    }}
+                    placeholder="0.00"
                   />
-                  {errors.clientValue && <p className="mt-1 text-sm text-red-600">{errors.clientValue}</p>}
+                  {errors.clientValue && <p style={styles.errorText}>{errors.clientValue}</p>}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    <Calendar size={16} style={styles.labelIcon} />
                     Next Follow-up Date
                   </label>
                   <input
@@ -418,18 +467,23 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
                     name="nextFollowUpDate"
                     value={formData.nextFollowUpDate}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    style={styles.input}
                   />
                 </div>
               </div>
             </div>
 
-            {/* Contact Information */}
-            <div>
-              <h4 className="text-md font-medium text-gray-900 mb-4">Contact Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+            {/* Contact Information Section */}
+            <div style={styles.section}>
+              <div style={styles.sectionHeader}>
+                <Link size={20} style={styles.sectionIcon} />
+                <h4 style={styles.sectionTitle}>Contact Information</h4>
+              </div>
+              
+              <div style={styles.grid}>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    <Link size={16} style={styles.labelIcon} />
                     LinkedIn Profile
                   </label>
                   <input
@@ -437,13 +491,14 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
                     name="linkedinProfile"
                     value={formData.linkedinProfile}
                     onChange={handleChange}
+                    style={styles.input}
                     placeholder="https://linkedin.com/in/..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    <Link size={16} style={styles.labelIcon} />
                     Website
                   </label>
                   <input
@@ -451,124 +506,127 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
                     name="website"
                     value={formData.website}
                     onChange={handleChange}
+                    style={styles.input}
                     placeholder="https://..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Address */}
-            <div>
-              <h4 className="text-md font-medium text-gray-900 mb-4">Address</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Street Address
-                  </label>
+            {/* Address Section */}
+            <div style={styles.section}>
+              <div style={styles.sectionHeader}>
+                <MapPin size={20} style={styles.sectionIcon} />
+                <h4 style={styles.sectionTitle}>Address</h4>
+              </div>
+              
+              <div style={styles.grid}>
+                <div style={{...styles.inputGroup, gridColumn: 'span 2'}}>
+                  <label style={styles.label}>Street Address</label>
                   <input
                     type="text"
                     name="address.street"
                     value={formData.address.street}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    style={styles.input}
+                    placeholder="Enter street address"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    City
-                  </label>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>City</label>
                   <input
                     type="text"
                     name="address.city"
                     value={formData.address.city}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    style={styles.input}
+                    placeholder="Enter city"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    State/Province
-                  </label>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>State/Province</label>
                   <input
                     type="text"
                     name="address.state"
                     value={formData.address.state}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    style={styles.input}
+                    placeholder="Enter state"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    ZIP/Postal Code
-                  </label>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>ZIP/Postal Code</label>
                   <input
                     type="text"
                     name="address.zipCode"
                     value={formData.address.zipCode}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    style={styles.input}
+                    placeholder="Enter ZIP code"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Country
-                  </label>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>Country</label>
                   <input
                     type="text"
                     name="address.country"
                     value={formData.address.country}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    style={styles.input}
+                    placeholder="Enter country"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Additional Information */}
-            <div>
-              <h4 className="text-md font-medium text-gray-900 mb-4">Additional Information</h4>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Tags (comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    name="tags"
-                    value={formData.tags}
-                    onChange={handleChange}
-                    placeholder="e.g., VIP, tech-savvy, frequent-traveler"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+            {/* Additional Information Section */}
+            <div style={styles.section}>
+              <div style={styles.sectionHeader}>
+                <Tag size={20} style={styles.sectionIcon} />
+                <h4 style={styles.sectionTitle}>Additional Information</h4>
+              </div>
+              
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>
+                  <Tag size={16} style={styles.labelIcon} />
+                  Tags (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  name="tags"
+                  value={formData.tags}
+                  onChange={handleChange}
+                  style={styles.input}
+                  placeholder="e.g., VIP, tech-savvy, frequent-traveler"
+                />
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Notes
-                  </label>
-                  <textarea
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleChange}
-                    rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Any additional notes about this client..."
-                  ></textarea>
-                </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>
+                  <FileText size={16} style={styles.labelIcon} />
+                  Notes
+                </label>
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleChange}
+                  rows="4"
+                  style={styles.textarea}
+                  placeholder="Any additional notes about this client..."
+                />
               </div>
             </div>
 
-            {/* Form Actions */}
-            <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            {/* Professional Form Actions */}
+            <div style={styles.actions}>
               <button
                 type="button"
                 onClick={onCancel}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                style={styles.cancelButton}
                 disabled={loading}
               >
                 Cancel
@@ -576,9 +634,22 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  ...styles.submitButton,
+                  ...(loading ? styles.submitButtonDisabled : {})
+                }}
               >
-                {loading ? 'Saving...' : (client ? 'Update Client' : 'Create Client')}
+                {loading ? (
+                  <div style={styles.loadingContent}>
+                    <div style={styles.spinner}></div>
+                    Saving...
+                  </div>
+                ) : (
+                  <div style={styles.submitContent}>
+                    <Save size={20} />
+                    {client ? 'Update Client' : 'Create Client'}
+                  </div>
+                )}
               </button>
             </div>
           </form>
@@ -587,5 +658,365 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
     </div>
   );
 };
+
+const styles = {
+  overlay: {
+    position: 'fixed',
+    inset: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    overflowY: 'auto',
+    height: '100%',
+    width: '100%',
+    zIndex: 50,
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    padding: '20px'
+  },
+
+  modal: {
+    position: 'relative',
+    width: '100%',
+    maxWidth: '1000px',
+    backgroundColor: 'white',
+    borderRadius: '20px',
+    boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
+    marginTop: '40px',
+    marginBottom: '40px'
+  },
+
+  container: {
+    padding: '32px',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  },
+
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '32px',
+    paddingBottom: '24px',
+    borderBottom: '1px solid #f1f5f9'
+  },
+
+  headerLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px'
+  },
+
+  headerIcon: {
+    width: '48px',
+    height: '48px',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+  },
+
+  title: {
+    fontSize: '24px',
+    fontWeight: '700',
+    margin: 0,
+    color: '#1e293b'
+  },
+
+  subtitle: {
+    fontSize: '14px',
+    color: '#64748b',
+    margin: '4px 0 0 0'
+  },
+
+  closeButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '40px',
+    height: '40px',
+    border: '1px solid #e2e8f0',
+    borderRadius: '10px',
+    backgroundColor: 'white',
+    color: '#64748b',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease'
+  },
+
+  errorAlert: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '16px',
+    backgroundColor: '#fef2f2',
+    border: '1px solid #fecaca',
+    borderRadius: '12px',
+    color: '#991b1b',
+    fontSize: '14px',
+    fontWeight: '500',
+    marginBottom: '24px'
+  },
+
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '32px'
+  },
+
+  section: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px'
+  },
+
+  sectionHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    paddingBottom: '16px',
+    borderBottom: '1px solid #f1f5f9'
+  },
+
+  sectionIcon: {
+    color: '#667eea'
+  },
+
+  sectionTitle: {
+    fontSize: '18px',
+    fontWeight: '600',
+    margin: 0,
+    color: '#1e293b'
+  },
+
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '20px'
+  },
+
+  inputGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px'
+  },
+
+  label: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: '4px'
+  },
+
+  labelIcon: {
+    color: '#94a3b8'
+  },
+
+  input: {
+    width: '100%',
+    padding: '12px 16px',
+    border: '2px solid #e2e8f0',
+    borderRadius: '10px',
+    fontSize: '14px',
+    fontFamily: 'inherit',
+    transition: 'all 0.2s ease',
+    backgroundColor: '#f8fafc',
+    boxSizing: 'border-box'
+  },
+
+  inputError: {
+    borderColor: '#ef4444',
+    backgroundColor: '#fef2f2'
+  },
+
+  select: {
+    width: '100%',
+    padding: '12px 16px',
+    border: '2px solid #e2e8f0',
+    borderRadius: '10px',
+    fontSize: '14px',
+    fontFamily: 'inherit',
+    transition: 'all 0.2s ease',
+    backgroundColor: '#f8fafc',
+    boxSizing: 'border-box',
+    cursor: 'pointer'
+  },
+
+  textarea: {
+    width: '100%',
+    padding: '12px 16px',
+    border: '2px solid #e2e8f0',
+    borderRadius: '10px',
+    fontSize: '14px',
+    fontFamily: 'inherit',
+    transition: 'all 0.2s ease',
+    backgroundColor: '#f8fafc',
+    boxSizing: 'border-box',
+    resize: 'vertical',
+    minHeight: '100px'
+  },
+
+  errorText: {
+    fontSize: '12px',
+    color: '#ef4444',
+    margin: '4px 0 0 0',
+    fontWeight: '500'
+  },
+
+  actions: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '12px',
+    paddingTop: '24px',
+    borderTop: '1px solid #f1f5f9'
+  },
+
+  cancelButton: {
+    padding: '12px 24px',
+    border: '1px solid #e2e8f0',
+    borderRadius: '10px',
+    backgroundColor: 'white',
+    color: '#64748b',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease'
+  },
+
+  submitButton: {
+    padding: '12px 24px',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '10px',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+    minWidth: '140px'
+  },
+
+  submitButtonDisabled: {
+    opacity: 0.7,
+    cursor: 'not-allowed'
+  },
+
+  loadingContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px'
+  },
+
+  submitContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px'
+  },
+
+  spinner: {
+    width: '16px',
+    height: '16px',
+    border: '2px solid rgba(255,255,255,0.3)',
+    borderTop: '2px solid white',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite'
+  }
+};
+
+// Add CSS animations and hover effects
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Focus and hover effects */
+  input:focus, select:focus, textarea:focus {
+    outline: none !important;
+    border-color: #667eea !important;
+    background-color: white !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  }
+
+  .close-button:hover {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: #374151 !important;
+  }
+
+  .cancel-button:hover {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: #374151 !important;
+  }
+
+  .submit-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4) !important;
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .modal {
+      margin: 20px !important;
+      max-width: calc(100% - 40px) !important;
+    }
+
+    .container {
+      padding: 24px !important;
+    }
+
+    .grid {
+      grid-template-columns: 1fr !important;
+    }
+
+    .header {
+      flex-direction: column !important;
+      gap: 16px !important;
+      align-items: flex-start !important;
+    }
+
+    .header-left {
+      width: 100% !important;
+    }
+
+    .actions {
+      flex-direction: column-reverse !important;
+    }
+
+    .cancel-button, .submit-button {
+      width: 100% !important;
+      justify-content: center !important;
+    }
+      
+  @media (max-width: 480px) {
+   .overlay {
+     padding: 10px !important;
+   }
+
+   .modal {
+     margin: 10px !important;
+     max-width: calc(100% - 20px) !important;
+   }
+
+   .container {
+     padding: 20px !important;
+   }
+
+   .title {
+     fontSize: 20px !important;
+   }
+
+   .header-icon {
+     width: 40px !important;
+     height: 40px !important;
+   }
+ }
+`;
+document.head.appendChild(styleSheet);
 
 export default ClientForm;

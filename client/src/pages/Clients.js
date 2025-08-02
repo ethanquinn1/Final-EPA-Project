@@ -1,78 +1,145 @@
+// 📁 client/src/pages/Clients.js
+// SAFE VERSION - Your existing functionality with minimal styling changes
 import React, { useState } from 'react';
 import ClientList from '../components/ClientList';
 import ClientForm from '../components/ClientForm';
 
 const Clients = () => {
+  // KEEP: All your existing state exactly as is
   const [selectedClient, setSelectedClient] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Handle adding new client
+  // KEEP: All your existing handlers exactly as they are
   const handleAddClient = () => {
     setEditingClient(null);
     setIsFormOpen(true);
   };
 
-  // Handle editing existing client
   const handleEditClient = (client) => {
     setEditingClient(client);
     setIsFormOpen(true);
   };
 
-  // Handle client selection (for future detail view)
   const handleClientSelect = (client) => {
     setSelectedClient(client);
-    // TODO: Navigate to client detail page or show detail panel
     console.log('Selected client:', client);
   };
 
-  // Handle form save
   const handleFormSave = (savedClient) => {
     setIsFormOpen(false);
     setEditingClient(null);
-    setRefreshKey(prev => prev + 1); // Refresh the list
+    setRefreshKey(prev => prev + 1);
     
-    // Show success message
     const action = editingClient ? 'updated' : 'created';
     console.log(`Client ${action} successfully:`, savedClient);
   };
 
-  // Handle form cancel
   const handleFormCancel = () => {
     setIsFormOpen(false);
     setEditingClient(null);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Client Management</h1>
-          <p className="mt-2 text-gray-600">
+    <div style={styles.container}>
+      {/* Simple Professional Header - No complex components */}
+      <div style={styles.header}>
+        <div style={styles.titleSection}>
+          <h1 style={styles.pageTitle}>Client Management</h1>
+          <p style={styles.pageSubtitle}>
             Manage your client relationships and track engagement
           </p>
         </div>
+        <button 
+          style={styles.addButton}
+          onClick={handleAddClient} // KEEP: Your existing function
+        >
+          + Add Client
+        </button>
+      </div>
 
-        {/* Client List */}
+      {/* Simple Content Wrapper - Just a white background */}
+      <div style={styles.contentWrapper}>
+        {/* KEEP: Your existing ClientList component with ALL original props */}
         <ClientList
-          key={refreshKey} // Force refresh when refreshKey changes
-          onClientSelect={handleClientSelect}
+          key={refreshKey} // KEEP: Your refresh key logic
+          onClientSelect={handleClientSelect} // KEEP: Your existing handlers
           onClientEdit={handleEditClient}
           onClientAdd={handleAddClient}
         />
-
-        {/* Client Form Modal */}
-        <ClientForm
-          client={editingClient}
-          onSave={handleFormSave}
-          onCancel={handleFormCancel}
-          isOpen={isFormOpen}
-        />
       </div>
+
+      {/* KEEP: Your existing ClientForm component exactly as is */}
+      <ClientForm
+        client={editingClient}
+        onSave={handleFormSave}
+        onCancel={handleFormCancel}
+        isOpen={isFormOpen}
+      />
     </div>
   );
+};
+
+// Simple, safe styles - no complex features that could break
+const styles = {
+  container: {
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%)',
+    padding: '32px',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  },
+
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '32px',
+    flexWrap: 'wrap',
+    gap: '16px'
+  },
+
+  titleSection: {
+    flex: 1,
+    minWidth: '300px'
+  },
+
+  pageTitle: {
+    fontSize: '32px',
+    fontWeight: '700',
+    margin: 0,
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text'
+  },
+
+  pageSubtitle: {
+    color: '#64748b',
+    margin: '4px 0 0 0',
+    fontSize: '16px'
+  },
+
+  addButton: {
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '10px',
+    padding: '12px 24px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+    fontSize: '14px'
+  },
+
+  contentWrapper: {
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    padding: '24px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+    border: '1px solid #f1f5f9'
+  }
 };
 
 export default Clients;

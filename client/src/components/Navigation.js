@@ -1,24 +1,7 @@
-// 📁 client/src/App.js
-// Your existing functionality with professional styling upgrade
-import React, { useContext, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
-import './App.css';
+// Professional Navigation Component
+// Location: client/src/components/Navigation.js
 
-// KEEP: All your existing imports
-import Dashboard from './pages/Dashboard';
-import Clients from './pages/Clients';
-import Interactions from './pages/Interactions';
-import ClientDetail from './pages/ClientDetail';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import SetupTotp from './pages/SetupTotp';
-
-// KEEP: Auth & Protected Routes
-import { AuthProvider } from './context/AuthContext';
-import AuthContext from './context/AuthContext';
-import PrivateRoute from './components/PrivateRoute';
-
-// Professional Icons
+import React, { useState } from 'react';
 import { 
   LayoutDashboard, 
   Users, 
@@ -32,29 +15,29 @@ import {
   LogOut,
   ChevronDown,
   Menu,
-  X,
-  Shield
+  X
 } from 'lucide-react';
 
-const Navigation = () => {
-  // KEEP: Your existing logout functionality
-  const { logout, user } = useContext(AuthContext);
-  const location = useLocation();
-  
-  // Professional navigation state
+const Navigation = ({ currentPage = 'Dashboard', onNavigate, onLogout }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const navigationItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/', active: location.pathname === '/' },
-    { name: 'Clients', icon: Users, path: '/clients', active: location.pathname === '/clients' },
-    { name: 'Interactions', icon: MessageSquare, path: '/interactions', active: location.pathname === '/interactions' },
-    { name: 'Analytics', icon: BarChart3, path: '#', disabled: true, badge: 'Soon' }
+    { name: 'Dashboard', icon: LayoutDashboard, active: currentPage === 'Dashboard' },
+    { name: 'Clients', icon: Users, active: currentPage === 'Clients' },
+    { name: 'Interactions', icon: MessageSquare, active: currentPage === 'Interactions' },
+    { name: 'Analytics', icon: BarChart3, active: currentPage === 'Analytics', badge: 'Soon' }
   ];
 
+  const handleNavigation = (pageName) => {
+    onNavigate(pageName);
+    setIsMobileMenuOpen(false);
+    setIsProfileOpen(false);
+  };
+
   const handleLogout = () => {
-    logout(); // KEEP: Your existing logout function
+    onLogout();
     setIsProfileOpen(false);
   };
 
@@ -71,7 +54,7 @@ const Navigation = () => {
         <div style={styles.logoSection}>
           <div style={styles.logo}>
             <div style={styles.logoIcon}>
-              <Shield size={24} color="white" />
+              <LayoutDashboard size={24} color="white" />
             </div>
             <span style={styles.logoText}>Engage360 CRM</span>
           </div>
@@ -90,33 +73,20 @@ const Navigation = () => {
           {/* Navigation Links */}
           <div style={styles.navLinks}>
             {navigationItems.map((item) => (
-              item.disabled ? (
-                <span
-                  key={item.name}
-                  style={styles.navLinkDisabled}
-                >
-                  <item.icon size={20} />
-                  <span>{item.name}</span>
-                  {item.badge && (
-                    <span style={styles.badge}>{item.badge}</span>
-                  )}
-                </span>
-              ) : (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  style={{
-                    ...styles.navLink,
-                    ...(item.active ? styles.navLinkActive : {})
-                  }}
-                >
-                  <item.icon size={20} />
-                  <span>{item.name}</span>
-                  {item.badge && (
-                    <span style={styles.badge}>{item.badge}</span>
-                  )}
-                </Link>
-              )
+              <button
+                key={item.name}
+                onClick={() => handleNavigation(item.name)}
+                style={{
+                  ...styles.navLink,
+                  ...(item.active ? styles.navLinkActive : {})
+                }}
+              >
+                <item.icon size={20} />
+                <span>{item.name}</span>
+                {item.badge && (
+                  <span style={styles.badge}>{item.badge}</span>
+                )}
+              </button>
             ))}
           </div>
 
@@ -135,10 +105,10 @@ const Navigation = () => {
 
           {/* Right Section */}
           <div style={styles.rightSection}>
-            {/* Quick Action Button */}
+            {/* Add Client Button */}
             <button style={styles.addButton}>
               <Plus size={20} />
-              <span>Quick Action</span>
+              <span>Add Client</span>
             </button>
 
             {/* Notifications */}
@@ -157,7 +127,7 @@ const Navigation = () => {
                   <User size={20} color="white" />
                 </div>
                 <div style={styles.profileInfo}>
-                  <span style={styles.profileName}>{user?.name || 'User'}</span>
+                  <span style={styles.profileName}>John Doe</span>
                   <span style={styles.profileRole}>Admin</span>
                 </div>
                 <ChevronDown size={16} style={{
@@ -204,34 +174,20 @@ const Navigation = () => {
             {/* Mobile Navigation Links */}
             <div style={styles.mobileNavLinks}>
               {navigationItems.map((item) => (
-                item.disabled ? (
-                  <span
-                    key={item.name}
-                    style={styles.mobileNavLinkDisabled}
-                  >
-                    <item.icon size={20} />
-                    <span>{item.name}</span>
-                    {item.badge && (
-                      <span style={styles.mobileBadge}>{item.badge}</span>
-                    )}
-                  </span>
-                ) : (
-                  <Link
-                    key={item.name}
-                    to={item.path}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    style={{
-                      ...styles.mobileNavLink,
-                      ...(item.active ? styles.mobileNavLinkActive : {})
-                    }}
-                  >
-                    <item.icon size={20} />
-                    <span>{item.name}</span>
-                    {item.badge && (
-                      <span style={styles.mobileBadge}>{item.badge}</span>
-                    )}
-                  </Link>
-                )
+                <button
+                  key={item.name}
+                  onClick={() => handleNavigation(item.name)}
+                  style={{
+                    ...styles.mobileNavLink,
+                    ...(item.active ? styles.mobileNavLinkActive : {})
+                  }}
+                >
+                  <item.icon size={20} />
+                  <span>{item.name}</span>
+                  {item.badge && (
+                    <span style={styles.mobileBadge}>{item.badge}</span>
+                  )}
+                </button>
               ))}
             </div>
 
@@ -239,7 +195,7 @@ const Navigation = () => {
             <div style={styles.mobileActions}>
               <button style={styles.mobileAddButton}>
                 <Plus size={20} />
-                <span>Quick Action</span>
+                <span>Add Client</span>
               </button>
             </div>
           </div>
@@ -252,66 +208,7 @@ const Navigation = () => {
   );
 };
 
-const AppLayout = () => {
-  // KEEP: Your existing user context
-  const { user } = useContext(AuthContext);
-  
-  return (
-    <div style={styles.appContainer}>
-      {/* KEEP: Your existing conditional navigation logic */}
-      {user && <Navigation />}
-      <main style={styles.main}>
-        {/* KEEP: All your existing routes exactly as they are */}
-        <Routes>
-          {/* Public routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/setup-totp" element={<SetupTotp />} />
-          
-          {/* Protected routes */}
-          <Route 
-            path="/" 
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            } 
-          />
-          <Route path="/dashboard" element={<Navigate to="/" replace />} />
-          <Route path="/clients" element={<PrivateRoute><Clients /></PrivateRoute>} />
-          <Route path="/interactions" element={<PrivateRoute><Interactions /></PrivateRoute>} />
-          <Route path="/clients/:id" element={<PrivateRoute><ClientDetail /></PrivateRoute>} />
-          
-          {/* Catch-all route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-    </div>
-  );
-};
-
-// KEEP: Your existing App function structure
-function App() {
-  return (
-    <Router>
-      <AuthProvider>
-        <AppLayout />
-      </AuthProvider>
-    </Router>
-  );
-}
-
 const styles = {
-  appContainer: {
-    minHeight: '100vh',
-    backgroundColor: '#f8fafc',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-  },
-
-  main: {
-    minHeight: 'calc(100vh - 140px)' // Account for navigation height
-  },
-
   nav: {
     backgroundColor: 'white',
     borderBottom: '1px solid #e2e8f0',
@@ -402,19 +299,6 @@ const styles = {
     backgroundColor: '#f1f5f9',
     color: '#2563eb',
     fontWeight: '600'
-  },
-
-  navLinkDisabled: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '12px 16px',
-    borderRadius: '10px',
-    color: '#94a3b8',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'not-allowed',
-    position: 'relative'
   },
 
   badge: {
@@ -598,7 +482,7 @@ const styles = {
     color: '#ef4444'
   },
 
-  // Mobile Styles
+  
   mobileNav: {
     display: 'none',
     position: 'absolute',
@@ -641,28 +525,20 @@ const styles = {
     padding: '16px',
     borderRadius: '10px',
     color: '#64748b',
-    textDecoration: 'none',
+    border: 'none',
+    background: 'none',
     fontWeight: '500',
     fontSize: '16px',
-    transition: 'all 0.2s ease'
+    transition: 'all 0.2s ease',
+    cursor: 'pointer',
+    width: '100%',
+    textAlign: 'left'
   },
 
   mobileNavLinkActive: {
     backgroundColor: '#f1f5f9',
     color: '#2563eb',
     fontWeight: '600'
-  },
-
-  mobileNavLinkDisabled: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    padding: '16px',
-    borderRadius: '10px',
-    color: '#94a3b8',
-    fontSize: '16px',
-    fontWeight: '500',
-    cursor: 'not-allowed'
   },
 
   mobileBadge: {
@@ -707,7 +583,7 @@ const styles = {
   }
 };
 
-// Add responsive styles and hover effects
+
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
   /* Hover Effects */
@@ -773,4 +649,4 @@ styleSheet.textContent = `
 `;
 document.head.appendChild(styleSheet);
 
-export default App;
+export default Navigation;

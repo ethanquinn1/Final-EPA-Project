@@ -1,12 +1,27 @@
+// 📁 client/src/pages/Interactions.js
+// Your existing functionality with professional styling upgrade
 import React, { useState } from 'react';
 import InteractionList from '../components/InteractionList';
 import InteractionForm from '../components/InteractionForm';
+import { 
+  MessageSquare, 
+  Plus, 
+  TrendingUp,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Calendar,
+  Target,
+  Activity
+} from 'lucide-react';
 
 const Interactions = () => {
+  // KEEP: All your existing state exactly as is
   const [showForm, setShowForm] = useState(false);
   const [editingInteraction, setEditingInteraction] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
+  // KEEP: All your existing handlers exactly as they are
   const handleNewInteraction = () => {
     setEditingInteraction(null);
     setShowForm(true);
@@ -32,9 +47,10 @@ const Interactions = () => {
     setRefreshTrigger(prev => prev + 1); // Trigger refresh
   };
 
+  // KEEP: Your existing form display logic
   if (showForm) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div style={styles.formContainer}>
         <InteractionForm
           interaction={editingInteraction}
           onSubmit={handleFormSubmit}
@@ -45,36 +61,415 @@ const Interactions = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Page Header */}
-      <div className="mb-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Interactions</h1>
-            <p className="mt-2 text-gray-600">
-              Track all your client communications and activities
-            </p>
+    <div style={styles.container}>
+      {/* Professional Header Section */}
+      <div style={styles.header}>
+        <div style={styles.headerLeft}>
+          <div style={styles.titleSection}>
+            <MessageSquare size={32} style={styles.headerIcon} />
+            <div>
+              <h1 style={styles.pageTitle}>Interactions</h1>
+              <p style={styles.pageSubtitle}>
+                Track all your client communications and activities
+              </p>
+            </div>
           </div>
-          <button
-            onClick={handleNewInteraction}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        </div>
+
+        <div style={styles.headerRight}>
+          <button 
+            style={styles.exportButton}
+            onClick={() => console.log('Export functionality')}
           >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
+            <Calendar size={20} />
+            Export Report
+          </button>
+          <button 
+            style={styles.addButton}
+            onClick={handleNewInteraction} // KEEP: Your existing function
+          >
+            <Plus size={20} />
             New Interaction
           </button>
         </div>
       </div>
 
-      {/* Interactions List */}
-      <InteractionList
-        onInteractionEdit={handleEditInteraction}
-        onInteractionDelete={handleInteractionDelete}
-        refreshTrigger={refreshTrigger}
-      />
+      {/* Professional Stats Overview */}
+      <div style={styles.statsGrid}>
+        <div style={styles.statCard}>
+          <div style={{...styles.statIcon, backgroundColor: '#dbeafe'}}>
+            <MessageSquare size={24} color="#2563eb" />
+          </div>
+          <div style={styles.statContent}>
+            <h3 style={styles.statNumber}>--</h3>
+            <p style={styles.statLabel}>Total Interactions</p>
+            <div style={styles.statChange}>
+              <TrendingUp size={16} color="#10b981" />
+              <span style={{color: '#10b981'}}>Active engagement</span>
+            </div>
+          </div>
+        </div>
+
+        <div style={styles.statCard}>
+          <div style={{...styles.statIcon, backgroundColor: '#dcfce7'}}>
+            <CheckCircle size={24} color="#059669" />
+          </div>
+          <div style={styles.statContent}>
+            <h3 style={styles.statNumber}>--</h3>
+            <p style={styles.statLabel}>Successful</p>
+            <div style={styles.statChange}>
+              <CheckCircle size={16} color="#10b981" />
+              <span style={{color: '#10b981'}}>Great success rate</span>
+            </div>
+          </div>
+        </div>
+
+        <div style={styles.statCard}>
+          <div style={{...styles.statIcon, backgroundColor: '#fef3c7'}}>
+            <Clock size={24} color="#d97706" />
+          </div>
+          <div style={styles.statContent}>
+            <h3 style={styles.statNumber}>--</h3>
+            <p style={styles.statLabel}>Pending Response</p>
+            <div style={styles.statChange}>
+              <Clock size={16} color="#f59e0b" />
+              <span style={{color: '#f59e0b'}}>Awaiting replies</span>
+            </div>
+          </div>
+        </div>
+
+        <div style={styles.statCard}>
+          <div style={{...styles.statIcon, backgroundColor: '#fef2f2'}}>
+            <AlertCircle size={24} color="#dc2626" />
+          </div>
+          <div style={styles.statContent}>
+            <h3 style={styles.statNumber}>--</h3>
+            <p style={styles.statLabel}>Need Follow-up</p>
+            <div style={styles.statChange}>
+              <Target size={16} color="#ef4444" />
+              <span style={{color: '#ef4444'}}>Action required</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions Section */}
+      <div style={styles.quickActions}>
+        <h3 style={styles.quickActionsTitle}>Quick Actions</h3>
+        <div style={styles.quickActionButtons}>
+          <button 
+            style={styles.quickActionButton}
+            onClick={handleNewInteraction}
+          >
+            <MessageSquare size={20} />
+            <span>Log Call</span>
+          </button>
+          <button 
+            style={styles.quickActionButton}
+            onClick={handleNewInteraction}
+          >
+            <Calendar size={20} />
+            <span>Schedule Meeting</span>
+          </button>
+          <button 
+            style={styles.quickActionButton}
+            onClick={handleNewInteraction}
+          >
+            <Activity size={20} />
+            <span>Send Email</span>
+          </button>
+          <button 
+            style={styles.quickActionButton}
+            onClick={handleNewInteraction}
+          >
+            <Target size={20} />
+            <span>Add Note</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Professional Content Wrapper */}
+      <div style={styles.contentWrapper}>
+        {/* KEEP: Your existing InteractionList component with all functionality */}
+        <InteractionList
+          onInteractionEdit={handleEditInteraction} // KEEP: Your existing handlers
+          onInteractionDelete={handleInteractionDelete}
+          refreshTrigger={refreshTrigger}
+        />
+      </div>
     </div>
   );
 };
+
+const styles = {
+  container: {
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%)',
+    padding: '32px',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  },
+
+  formContainer: {
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%)',
+    padding: '32px',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  },
+
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '32px'
+  },
+
+  headerLeft: {
+    display: 'flex',
+    alignItems: 'center'
+  },
+
+  titleSection: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px'
+  },
+
+  headerIcon: {
+    color: '#667eea'
+  },
+
+  pageTitle: {
+    fontSize: '32px',
+    fontWeight: '700',
+    margin: 0,
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text'
+  },
+
+  pageSubtitle: {
+    color: '#64748b',
+    margin: '4px 0 0 0',
+    fontSize: '16px'
+  },
+
+  headerRight: {
+    display: 'flex',
+    gap: '12px'
+  },
+
+  exportButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px 16px',
+    border: '1px solid #e2e8f0',
+    borderRadius: '10px',
+    backgroundColor: 'white',
+    color: '#64748b',
+    cursor: 'pointer',
+    fontWeight: '500',
+    transition: 'all 0.2s ease',
+    fontSize: '14px'
+  },
+
+  addButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '10px',
+    padding: '12px 16px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+    fontSize: '14px'
+  },
+
+  statsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '24px',
+    marginBottom: '32px'
+  },
+
+  statCard: {
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    padding: '24px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    border: '1px solid #f1f5f9',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    transition: 'all 0.2s ease'
+  },
+
+  statIcon: {
+    width: '56px',
+    height: '56px',
+    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+
+  statContent: {
+    flex: 1
+  },
+
+  statNumber: {
+    fontSize: '28px',
+    fontWeight: '700',
+    margin: '0 0 4px 0',
+    color: '#1e293b'
+  },
+
+  statLabel: {
+    color: '#64748b',
+    fontSize: '14px',
+    margin: '0 0 8px 0'
+  },
+
+  statChange: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    fontSize: '12px',
+    fontWeight: '500'
+  },
+
+  quickActions: {
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    padding: '24px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    border: '1px solid #f1f5f9',
+    marginBottom: '24px'
+  },
+
+  quickActionsTitle: {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#1e293b',
+    margin: '0 0 16px 0'
+  },
+
+  quickActionButtons: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '12px'
+  },
+
+  quickActionButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '16px',
+    border: '1px solid #e2e8f0',
+    borderRadius: '12px',
+    backgroundColor: '#f8fafc',
+    color: '#374151',
+    cursor: 'pointer',
+    fontWeight: '500',
+    fontSize: '14px',
+    transition: 'all 0.2s ease'
+  },
+
+  contentWrapper: {
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    padding: '24px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+    border: '1px solid #f1f5f9'
+  }
+};
+
+// Add professional hover effects
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `
+  .add-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4) !important;
+  }
+
+  .export-button:hover {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    transform: translateY(-1px);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  }
+
+  .quick-action-button:hover {
+    background-color: white !important;
+    border-color: #667eea !important;
+    color: #667eea !important;
+    transform: translateY(-1px);
+  }
+
+  .quick-actions:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .header {
+      flex-direction: column !important;
+      gap: 16px !important;
+      align-items: stretch !important;
+    }
+
+    .header-right {
+      justify-content: space-between !important;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr !important;
+    }
+
+    .quick-action-buttons {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .container, .form-container {
+      padding: 16px !important;
+    }
+
+    .content-wrapper, .quick-actions {
+      padding: 16px !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .page-title {
+      fontSize: 24px !important;
+    }
+
+    .stats-grid {
+      gap: 16px !important;
+    }
+
+    .stat-card {
+      padding: 16px !important;
+    }
+
+    .quick-action-buttons {
+      grid-template-columns: 1fr !important;
+    }
+
+    .quick-action-button {
+      padding: 12px !important;
+    }
+  }
+`;
+document.head.appendChild(styleSheet);
 
 export default Interactions;
