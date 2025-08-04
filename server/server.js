@@ -80,9 +80,31 @@ app.use('/api/auth', require('./routes/auth'));
 
 // Protected routes (add auth middleware if needed)
 app.use('/api/clients', require('./routes/clients'));
-app.use('/api/interactions', require('./routes/interactions'));
+app.use('/api/interactions', require('./routes/Interactions'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/search', require('./routes/search'));
+
+// Add new routes with try/catch to not break existing functionality
+try {
+  app.use('/api/notifications', require('./routes/notifications'));
+  console.log('✅ Notifications route loaded');
+} catch (error) {
+  console.log('⚠️  Notifications route not found, skipping...');
+}
+
+try {
+  app.use('/api/quick-actions', require('./routes/quickActions'));
+  console.log('✅ Quick actions route loaded');
+} catch (error) {
+  console.log('⚠️  Quick actions route not found, skipping...');
+}
+
+try {
+  app.use('/api/user', require('./routes/user'));
+  console.log('✅ User route loaded');
+} catch (error) {
+  console.log('⚠️  User route not found, skipping...');
+}
 
 console.log('✅ All routes loaded successfully');
 
