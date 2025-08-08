@@ -1,8 +1,6 @@
-// server/routes/notifications.js
-// Backend endpoints for notifications and quick actions
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
+const auth = require('../middleware/authMiddleware');
 
 // Mock notification data (replace with database later)
 let notifications = [

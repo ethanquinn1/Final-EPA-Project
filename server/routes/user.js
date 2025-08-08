@@ -1,10 +1,7 @@
-// server/routes/user.js
-// Backend endpoints for user profile and preferences
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
+const auth = require('../middleware/authMiddleware');
 
-// Mock user preferences (replace with database later)
 let userPreferences = {
   theme: 'light',
   language: 'en',
@@ -23,7 +20,7 @@ let userPreferences = {
   dashboard: {
     layout: 'default',
     widgets: ['metrics', 'charts', 'recent-activity', 'follow-ups'],
-    refreshInterval: 30000 // 30 seconds
+    refreshInterval: 30000
   },
   privacy: {
     profileVisibility: 'team',
@@ -32,16 +29,14 @@ let userPreferences = {
   }
 };
 
-// GET /api/user/profile - Get user profile
 router.get('/profile', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     
-    // Mock user profile (in real app, fetch from database)
     const userProfile = {
       id: userId,
-      name: req.user.name || 'User',
-      email: req.user.email || 'user@engage360.com',
+      name: req.user?.name || 'User',
+      email: req.user?.email || 'user@engage360.com',
       role: 'Admin',
       department: 'Sales',
       avatar: null,
@@ -71,13 +66,11 @@ router.get('/profile', auth, async (req, res) => {
   }
 });
 
-// PUT /api/user/profile - Update user profile
 router.put('/profile', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const { name, email, phone, address, linkedIn, twitter } = req.body;
 
-    // Validate required fields
     if (!name || !email) {
       return res.status(400).json({
         success: false,
@@ -85,7 +78,6 @@ router.put('/profile', auth, async (req, res) => {
       });
     }
 
-    // In real app, update database
     console.log(`Updating profile for user ${userId}:`, req.body);
 
     const updatedProfile = {
@@ -115,10 +107,9 @@ router.put('/profile', auth, async (req, res) => {
   }
 });
 
-// GET /api/user/preferences - Get user preferences
 router.get('/preferences', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
 
     res.json({
       success: true,
@@ -133,13 +124,11 @@ router.get('/preferences', auth, async (req, res) => {
   }
 });
 
-// PUT /api/user/preferences - Update user preferences
 router.put('/preferences', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const updates = req.body;
 
-    // Merge updates with existing preferences
     userPreferences = {
       ...userPreferences,
       ...updates,
@@ -173,13 +162,11 @@ router.put('/preferences', auth, async (req, res) => {
   }
 });
 
-// POST /api/user/change-password - Change user password
 router.post('/change-password', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const { currentPassword, newPassword, confirmPassword } = req.body;
 
-    // Validate required fields
     if (!currentPassword || !newPassword || !confirmPassword) {
       return res.status(400).json({
         success: false,
@@ -187,7 +174,6 @@ router.post('/change-password', auth, async (req, res) => {
       });
     }
 
-    // Validate password match
     if (newPassword !== confirmPassword) {
       return res.status(400).json({
         success: false,
@@ -195,7 +181,6 @@ router.post('/change-password', auth, async (req, res) => {
       });
     }
 
-    // Validate password strength
     if (newPassword.length < 8) {
       return res.status(400).json({
         success: false,
@@ -203,7 +188,6 @@ router.post('/change-password', auth, async (req, res) => {
       });
     }
 
-    // In real app, verify current password and update database
     console.log(`Password change requested for user ${userId}`);
 
     res.json({
@@ -219,19 +203,17 @@ router.post('/change-password', auth, async (req, res) => {
   }
 });
 
-// GET /api/user/activity - Get user activity log
 router.get('/activity', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const { limit = 20, offset = 0 } = req.query;
 
-    // Mock activity data
     const activities = [
       {
         id: 1,
         action: 'login',
         description: 'Logged into the system',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 min ago
+        timestamp: new Date(Date.now() - 30 * 60 * 1000),
         ipAddress: '192.168.1.100',
         userAgent: 'Chrome/91.0'
       },
@@ -239,31 +221,7 @@ router.get('/activity', auth, async (req, res) => {
         id: 2,
         action: 'client_created',
         description: 'Created new client: Acme Corporation',
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-        ipAddress: '192.168.1.100',
-        userAgent: 'Chrome/91.0'
-      },
-      {
-        id: 3,
-        action: 'interaction_logged',
-        description: 'Logged interaction with TechStart Inc',
-        timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
-        ipAddress: '192.168.1.100',
-        userAgent: 'Chrome/91.0'
-      },
-      {
-        id: 4,
-        action: 'report_generated',
-        description: 'Generated quarterly sales report',
-        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-        ipAddress: '192.168.1.100',
-        userAgent: 'Chrome/91.0'
-      },
-      {
-        id: 5,
-        action: 'preferences_updated',
-        description: 'Updated notification preferences',
-        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
         ipAddress: '192.168.1.100',
         userAgent: 'Chrome/91.0'
       }
@@ -294,13 +252,11 @@ router.get('/activity', auth, async (req, res) => {
   }
 });
 
-// DELETE /api/user/account - Delete user account
 router.delete('/account', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const { password, confirmation } = req.body;
 
-    // Validate deletion confirmation
     if (confirmation !== 'DELETE') {
       return res.status(400).json({
         success: false,
@@ -308,7 +264,6 @@ router.delete('/account', auth, async (req, res) => {
       });
     }
 
-    // In real app, verify password and delete account
     console.log(`Account deletion requested for user ${userId}`);
 
     res.json({
@@ -324,7 +279,6 @@ router.delete('/account', auth, async (req, res) => {
   }
 });
 
-// Utility function to format time ago
 const getTimeAgo = (date) => {
   const now = new Date();
   const diffInSeconds = Math.floor((now - date) / 1000);

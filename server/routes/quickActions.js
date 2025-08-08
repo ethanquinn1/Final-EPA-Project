@@ -1,10 +1,7 @@
-// server/routes/quickActions.js
-// Backend endpoints for quick actions
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
+const auth = require('../middleware/authMiddleware');
 
-// GET /api/quick-actions - Get available quick actions for user
 router.get('/', auth, async (req, res) => {
   try {
     const quickActions = [
@@ -106,16 +103,13 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// POST /api/quick-actions/execute - Execute a quick action
 router.post('/execute', auth, async (req, res) => {
   try {
     const { actionId, data = {} } = req.body;
     const userId = req.user.id;
 
-    // Log the action execution
     console.log(`User ${userId} executed quick action: ${actionId}`, data);
 
-    // Handle different quick actions
     let result = {};
     
     switch (actionId) {
@@ -190,7 +184,6 @@ router.post('/execute', auth, async (req, res) => {
         });
     }
 
-    // Create notification for action execution
     const notification = {
       type: 'action',
       title: 'Quick Action Executed',
@@ -213,12 +206,10 @@ router.post('/execute', auth, async (req, res) => {
   }
 });
 
-// GET /api/quick-actions/recent - Get recently used quick actions
 router.get('/recent', auth, async (req, res) => {
   try {
     const userId = req.user.id;
     
-    // Mock recent actions (in real app, this would come from database)
     const recentActions = [
       {
         id: 'log-interaction',
@@ -256,13 +247,11 @@ router.get('/recent', auth, async (req, res) => {
   }
 });
 
-// POST /api/quick-actions/favorite - Add quick action to favorites
 router.post('/favorite', auth, async (req, res) => {
   try {
     const { actionId } = req.body;
     const userId = req.user.id;
 
-    // In real app, save to database
     console.log(`User ${userId} favorited action: ${actionId}`);
 
     res.json({
@@ -279,13 +268,11 @@ router.post('/favorite', auth, async (req, res) => {
   }
 });
 
-// DELETE /api/quick-actions/favorite/:actionId - Remove quick action from favorites
 router.delete('/favorite/:actionId', auth, async (req, res) => {
   try {
     const { actionId } = req.params;
     const userId = req.user.id;
 
-    // In real app, remove from database
     console.log(`User ${userId} unfavorited action: ${actionId}`);
 
     res.json({

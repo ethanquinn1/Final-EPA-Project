@@ -3,6 +3,7 @@
 import React, { useContext, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import './App.css';
+import './styles/themes.css';
 
 // KEEP: All your existing imports
 import Dashboard from './pages/Dashboard';
@@ -12,17 +13,14 @@ import ClientDetail from './pages/ClientDetail';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import SetupTotp from './pages/SetupTotp';
-
-// NEW IMPORTS
 import Notifications from './pages/Notifications';
 import ProfilePreferences from './pages/ProfilePreferences';
-
-// KEEP: Auth & Protected Routes
-import { AuthProvider } from './context/AuthContext';
-import AuthContext from './context/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
+import AuthContext from './contexts/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
+import { PreferencesProvider } from './contexts/PreferencesContext';
 
-// Professional Icons
+
 import { 
   LayoutDashboard, 
   Users, 
@@ -445,9 +443,11 @@ const AppLayout = () => {
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <AppLayout />
-      </AuthProvider>
+     <PreferencesProvider>
+       <AuthProvider>
+         <AppLayout />
+       </AuthProvider>
+     </PreferencesProvider>
     </Router>
   );
 }
