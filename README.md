@@ -86,7 +86,6 @@ This will start:
 1. **Register a new account** at http://localhost:3000/register
 2. **Login** with your credentials
 3. **Access the dashboard** to see analytics and manage clients
-4. **Visit Profile Settings** to customize your preferences
 
 ### Key Pages
 
