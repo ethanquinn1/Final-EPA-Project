@@ -39,7 +39,7 @@ Customer Relationship Management system built with React and Node.js.
 
 1. **Clone the repository:**
 ```bash
-git clone <your-repo-url>
+git clone <https://github.com/ethanquinn1/Final-EPA-Project.git>
 cd engage360-crm
 ```
 
