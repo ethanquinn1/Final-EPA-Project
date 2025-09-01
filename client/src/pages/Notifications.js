@@ -1,4 +1,3 @@
-// client/src/pages/Notifications.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -42,7 +41,6 @@ const Notifications = () => {
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);
-      // Use sample data as fallback
       setNotifications([
         {
           id: 1,
@@ -121,7 +119,6 @@ const Notifications = () => {
       }
     } catch (error) {
       console.error('Error marking notification as read:', error);
-      // Optimistically update UI
       setNotifications(prev => 
         prev.map(notification => 
           notification.id === notificationId 
@@ -148,7 +145,6 @@ const Notifications = () => {
       }
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
-      // Optimistically update UI
       setNotifications(prev => 
         prev.map(notification => ({ ...notification, unread: false }))
       );
@@ -171,7 +167,6 @@ const Notifications = () => {
       }
     } catch (error) {
       console.error('Error deleting notification:', error);
-      // Optimistically update UI
       setNotifications(prev => 
         prev.filter(notification => notification.id !== notificationId)
       );

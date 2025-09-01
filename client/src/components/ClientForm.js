@@ -1,5 +1,3 @@
-// 📁 client/src/components/ClientForm.js
-// Your existing functionality with professional styling upgrade
 import React, { useState, useEffect } from 'react';
 import { clientAPI } from '../services/api';
 import { 
@@ -19,7 +17,6 @@ import {
 } from 'lucide-react';
 
 const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
-  // KEEP: All your existing state exactly as is
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -49,7 +46,6 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // KEEP: Your existing useEffect exactly as is
   useEffect(() => {
     if (client) {
       setFormData({
@@ -108,7 +104,6 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
     setErrors({});
   }, [client, isOpen]);
 
-  // KEEP: Your existing handleChange function exactly as is
   const handleChange = (e) => {
     const { name, value } = e.target;
     
@@ -136,7 +131,6 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
     }
   };
 
-  // KEEP: Your existing validateForm function exactly as is
   const validateForm = () => {
     const newErrors = {};
 
@@ -166,7 +160,6 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // KEEP: Your existing handleSubmit function exactly as is
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -218,7 +211,7 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
     <div style={styles.overlay}>
       <div style={styles.modal}>
         <div style={styles.container}>
-          {/* Professional Header */}
+          {/* Header */}
           <div style={styles.header}>
             <div style={styles.headerLeft}>
               <div style={styles.headerIcon}>
@@ -241,7 +234,7 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
             </button>
           </div>
 
-          {/* Professional Error Message */}
+          {/* Error Message */}
           {errors.general && (
             <div style={styles.errorAlert}>
               <AlertCircle size={20} />
@@ -621,7 +614,6 @@ const ClientForm = ({ client, onSave, onCancel, isOpen }) => {
               </div>
             </div>
 
-            {/* Professional Form Actions */}
             <div style={styles.actions}>
               <button
                 type="button"
@@ -926,7 +918,7 @@ const styles = {
   }
 };
 
-// Add CSS animations and hover effects
+// Adding CSS animations and hover effects
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
   @keyframes spin {

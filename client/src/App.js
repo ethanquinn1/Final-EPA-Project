@@ -1,11 +1,7 @@
-// 📁 client/src/App.js
-// Your existing functionality with professional styling upgrade
 import React, { useContext, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import './App.css';
 import './styles/themes.css';
-
-// KEEP: All your existing imports
 import Dashboard from './pages/Dashboard';
 import Clients from './pages/Clients';
 import Interactions from './pages/Interactions';
@@ -47,18 +43,15 @@ import {
 } from 'lucide-react';
 
 const Navigation = () => {
-  // KEEP: Your existing logout functionality
   const { logout, user } = useContext(AuthContext);
   const location = useLocation();
   
-  // Enhanced navigation state
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // FIXED: Analytics now enabled and clickable
   const navigationItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/', active: location.pathname === '/' },
     { name: 'Clients', icon: Users, path: '/clients', active: location.pathname === '/clients' },
@@ -386,15 +379,12 @@ const Navigation = () => {
 };
 
 const AppLayout = () => {
-  // KEEP: Your existing user context
   const { user } = useContext(AuthContext);
   
   return (
     <div style={styles.appContainer}>
-      {/* KEEP: Your existing conditional navigation logic */}
       {user && <Navigation />}
       <main style={styles.main}>
-        {/* UPDATED ROUTES with new pages */}
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
@@ -414,14 +404,12 @@ const AppLayout = () => {
           <Route path="/clients" element={<PrivateRoute><Clients /></PrivateRoute>} />
           <Route path="/interactions" element={<PrivateRoute><Interactions /></PrivateRoute>} />
           <Route path="/clients/:id" element={<PrivateRoute><ClientDetail /></PrivateRoute>} />
-          
-          {/* NEW ROUTES */}
           <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><ProfilePreferences /></PrivateRoute>} />
           <Route path="/preferences" element={<PrivateRoute><ProfilePreferences /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><ProfilePreferences /></PrivateRoute>} />
           
-          {/* Quick action routes (redirect to existing pages for now) */}
+          {/* Quick action routes */}
           <Route path="/clients/new" element={<PrivateRoute><Clients /></PrivateRoute>} />
           <Route path="/interactions/new" element={<PrivateRoute><Interactions /></PrivateRoute>} />
           <Route path="/calls/new" element={<Navigate to="/interactions/new" replace />} />
@@ -439,7 +427,6 @@ const AppLayout = () => {
   );
 };
 
-// KEEP: Your existing App function structure
 function App() {
   return (
     <Router>

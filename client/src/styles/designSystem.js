@@ -1,6 +1,3 @@
-// Design System for Engage360 CRM
-// Location: client/src/styles/designSystem.js
-
 export const designSystem = {
   // Color Palette
   colors: {
@@ -112,7 +109,6 @@ export const designSystem = {
   }
 };
 
-// Common Component Styles
 export const componentStyles = {
   // Button Styles
   button: {

@@ -9,7 +9,7 @@ const api = axios.create({
   },
 });
 
-// Request interceptor for adding auth token (when we implement auth)
+// Request interceptor for adding auth token 
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -81,7 +81,7 @@ export const clientAPI = {
   },
 };
 
-// Auth API methods (for future use)
+// Auth API methods 
 export const authAPI = {
   login: async (credentials) => {
     const response = await api.post('/auth/login', credentials);

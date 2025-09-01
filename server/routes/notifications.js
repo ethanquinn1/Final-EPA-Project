@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/authMiddleware');
 
-// Mock notification data (replace with database later)
+// Mock notification data
 let notifications = [
   {
     id: 1,

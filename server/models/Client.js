@@ -172,7 +172,7 @@ clientSchema.methods.updateEngagementScore = async function() {
     if (overdueFollowUps === 0) score += 5;
     else if (overdueFollowUps <= 2) score += 2;
 
-    // Cap the score at 100
+    // Caps score at 100
     this.engagementScore = Math.min(Math.round(score), 100);
     
     // Update last contact date if we have interactions

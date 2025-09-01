@@ -1,5 +1,3 @@
-// 📁 client/src/components/InteractionForm.js
-// Your existing functionality with professional styling upgrade
 import React, { useState, useEffect } from 'react';
 import { interactionAPI } from '../services/interactionAPI';
 import { clientAPI } from '../services/api';
@@ -27,7 +25,6 @@ const InteractionForm = ({
   onCancel,
   clients = [] 
 }) => {
-  // KEEP: All your existing state exactly as is
   const [formData, setFormData] = useState({
     clientId: clientId || '',
     type: 'note',
@@ -47,7 +44,6 @@ const InteractionForm = ({
   const [availableClients, setAvailableClients] = useState(clients);
   const [tagInput, setTagInput] = useState('');
 
-  // KEEP: All your existing useEffect functions exactly as they are
   useEffect(() => {
     if (interaction) {
       setFormData({
@@ -82,7 +78,6 @@ const InteractionForm = ({
     }
   }, [availableClients.length]);
 
-  // KEEP: All your existing handler functions exactly as they are
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -116,7 +111,6 @@ const InteractionForm = ({
     }));
   };
 
-  // KEEP: Your existing validation function exactly as is
   const validateForm = () => {
     const newErrors = {};
 
@@ -146,7 +140,6 @@ const InteractionForm = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  // KEEP: Your existing handleSubmit function exactly as is
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -194,7 +187,7 @@ const InteractionForm = ({
     <div style={styles.overlay}>
       <div style={styles.modal}>
         <div style={styles.container}>
-          {/* Professional Header */}
+          {/* Header */}
           <div style={styles.header}>
             <div style={styles.headerLeft}>
               <div style={styles.headerIcon}>
@@ -220,7 +213,7 @@ const InteractionForm = ({
             </button>
           </div>
 
-          {/* Professional Error Message */}
+          {/* Error Message */}
           {errors.general && (
             <div style={styles.errorAlert}>
               <AlertCircle size={20} />
@@ -478,7 +471,7 @@ const InteractionForm = ({
               </div>
             </div>
 
-            {/* Professional Form Actions */}
+            {/* Form Actions */}
             <div style={styles.actions}>
               <button
                 type="button"
@@ -859,7 +852,7 @@ const styles = {
   }
 };
 
-// Add CSS animations and hover effects
+// Adds CSS animations and hover effects
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
   @keyframes spin {

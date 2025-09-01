@@ -199,7 +199,7 @@ const FollowUpDashboard = () => {
                       </button>
                       <button
                         onClick={() => {
-                          // Navigate to edit interaction (you'll implement this)
+                          // Navigate to edit interaction
                           window.location.href = `/interactions?edit=${followUp._id}`;
                         }}
                         className="px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"

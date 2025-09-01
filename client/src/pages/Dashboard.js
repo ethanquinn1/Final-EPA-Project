@@ -1,4 +1,3 @@
-// client/src/pages/Dashboard.js - Enhanced with Follow-ups and Interactions Tables
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -385,7 +384,7 @@ const Dashboard = () => {
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%)'
       }}>
-        {/* Enhanced Header */}
+        {/* Header */}
         <div style={{
           backgroundColor: 'rgba(255,255,255,0.8)',
           backdropFilter: 'blur(8px)',

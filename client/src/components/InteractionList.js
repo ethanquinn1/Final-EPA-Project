@@ -1,5 +1,3 @@
-// 📁 client/src/components/InteractionList.js
-// Your existing functionality with professional styling upgrade
 import React, { useState, useEffect } from 'react';
 import { interactionAPI } from '../services/interactionAPI';
 import { 
@@ -31,7 +29,6 @@ const InteractionList = ({
   onInteractionDelete,
   refreshTrigger = 0 
 }) => {
-  // KEEP: All your existing state exactly as is
   const [interactions, setInteractions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -49,7 +46,6 @@ const InteractionList = ({
   const [pagination, setPagination] = useState({});
   const [showFilters, setShowFilters] = useState(false);
 
-  // KEEP: All your existing functions exactly as they are
   const loadInteractions = async () => {
     try {
       setLoading(true);
@@ -114,7 +110,7 @@ const InteractionList = ({
     }
   };
 
-  // ENHANCED: Professional date formatting with UK format
+  // date formatting 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-GB') + ' at ' + date.toLocaleTimeString('en-GB', { 
@@ -123,7 +119,7 @@ const InteractionList = ({
     });
   };
 
-  // ENHANCED: Professional type icons with Lucide React
+  // type icons with Lucide React
   const getTypeIcon = (type) => {
     const icons = {
       email: Mail,
@@ -136,7 +132,7 @@ const InteractionList = ({
     return icons[type] || FileText;
   };
 
-  // ENHANCED: Professional priority colors
+  // priority colors
   const getPriorityColor = (priority) => {
     const colors = {
       low: { bg: '#dcfce7', text: '#166534', border: '#bbf7d0' },
@@ -146,7 +142,7 @@ const InteractionList = ({
     return colors[priority] || colors.medium;
   };
 
-  // ENHANCED: Professional outcome colors
+  // outcome colors
   const getOutcomeColor = (outcome) => {
     const colors = {
       positive: { bg: '#dcfce7', text: '#166534', border: '#bbf7d0' },
@@ -171,7 +167,7 @@ const InteractionList = ({
     });
   };
 
-  // Professional loading state
+  // loading state
   if (loading && interactions.length === 0) {
     return (
       <div style={styles.loadingContainer}>
@@ -183,7 +179,7 @@ const InteractionList = ({
 
   return (
     <div style={styles.container}>
-      {/* Professional Header */}
+      {/* Header */}
       <div style={styles.header}>
         <div style={styles.headerLeft}>
           <h3 style={styles.title}>
@@ -205,7 +201,7 @@ const InteractionList = ({
         </button>
       </div>
 
-      {/* Professional Filters */}
+      {/* Filters */}
       {showFilters && (
         <div style={styles.filtersContainer}>
           <div style={styles.filtersGrid}>
@@ -314,7 +310,7 @@ const InteractionList = ({
         </div>
       )}
 
-      {/* Professional Error Message */}
+      {/* Error Message */}
       {error && (
         <div style={styles.errorContainer}>
           <AlertCircle size={20} />
@@ -322,7 +318,7 @@ const InteractionList = ({
         </div>
       )}
 
-      {/* Professional Interactions List */}
+      {/* Interactions List */}
       <div style={styles.interactionsContainer}>
         {interactions.length === 0 ? (
           <div style={styles.emptyState}>
@@ -455,7 +451,7 @@ const InteractionList = ({
         )}
       </div>
 
-      {/* Professional Pagination */}
+      {/* Pagination */}
       {pagination.totalPages > 1 && (
         <div style={styles.paginationContainer}>
           <div style={styles.paginationInfo}>

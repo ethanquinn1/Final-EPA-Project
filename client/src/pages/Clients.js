@@ -1,17 +1,13 @@
-// 📁 client/src/pages/Clients.js
-// SAFE VERSION - Your existing functionality with minimal styling changes
 import React, { useState } from 'react';
 import ClientList from '../components/ClientList';
 import ClientForm from '../components/ClientForm';
 
 const Clients = () => {
-  // KEEP: All your existing state exactly as is
   const [selectedClient, setSelectedClient] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // KEEP: All your existing handlers exactly as they are
   const handleAddClient = () => {
     setEditingClient(null);
     setIsFormOpen(true);
@@ -43,7 +39,6 @@ const Clients = () => {
 
   return (
     <div style={styles.container}>
-      {/* Simple Professional Header - No complex components */}
       <div style={styles.header}>
         <div style={styles.titleSection}>
           <h1 style={styles.pageTitle}>Client Management</h1>
@@ -53,24 +48,22 @@ const Clients = () => {
         </div>
         <button 
           style={styles.addButton}
-          onClick={handleAddClient} // KEEP: Your existing function
+          onClick={handleAddClient} 
         >
           + Add Client
         </button>
       </div>
 
-      {/* Simple Content Wrapper - Just a white background */}
+      {/* Simple Content Wrapper - a white background */}
       <div style={styles.contentWrapper}>
-        {/* KEEP: Your existing ClientList component with ALL original props */}
         <ClientList
-          key={refreshKey} // KEEP: Your refresh key logic
-          onClientSelect={handleClientSelect} // KEEP: Your existing handlers
+          key={refreshKey} 
+          onClientSelect={handleClientSelect} 
           onClientEdit={handleEditClient}
           onClientAdd={handleAddClient}
         />
       </div>
 
-      {/* KEEP: Your existing ClientForm component exactly as is */}
       <ClientForm
         client={editingClient}
         onSave={handleFormSave}
@@ -81,7 +74,6 @@ const Clients = () => {
   );
 };
 
-// Simple, safe styles - no complex features that could break
 const styles = {
   container: {
     minHeight: '100vh',

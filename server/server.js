@@ -75,16 +75,16 @@ app.get('/api/health', (req, res) => {
 // API Routes
 console.log('🔗 Loading API routes...');
 
-// Auth routes (should be first for proper middleware handling)
+// Auth routes 
 app.use('/api/auth', require('./routes/auth'));
 
-// Protected routes (add auth middleware if needed)
+// Protected routes 
 app.use('/api/clients', require('./routes/clients'));
 app.use('/api/interactions', require('./routes/Interactions'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/search', require('./routes/search'));
 
-// Add new routes with try/catch to not break existing functionality
+// Add new routes with try/catch
 try {
   app.use('/api/notifications', require('./routes/notifications'));
   console.log('✅ Notifications route loaded');
@@ -118,7 +118,7 @@ app.get('/api', (req, res) => {
   });
 });
 
-// Favicon handler (prevents 404s for favicon requests)
+// Favicon handler 
 app.get('/favicon.ico', (req, res) => {
   res.status(204).send();
 });

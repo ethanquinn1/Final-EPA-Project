@@ -1,5 +1,3 @@
-// 📁 client/src/components/ClientList.js
-// Your existing functionality with professional styling upgrade
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { clientAPI } from '../services/api';
@@ -19,7 +17,6 @@ import {
 } from 'lucide-react';
 
 const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
-  // KEEP: All your existing state exactly as is
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,7 +26,7 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState({});
 
-  // KEEP: Your existing fetch function exactly as is
+  // fetch function 
   const fetchClients = async () => {
     try {
       setLoading(true);
@@ -57,12 +54,12 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
     }
   };
 
-  // KEEP: Your existing useEffect exactly as is
+  // useEffect 
   useEffect(() => {
     fetchClients();
   }, [currentPage, searchTerm, statusFilter, priorityFilter]);
 
-  // KEEP: Your existing delete handler exactly as is
+  // delete handler 
   const handleDelete = async (clientId) => {
     if (window.confirm('Are you sure you want to delete this client?')) {
       try {
@@ -75,7 +72,7 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
     }
   };
 
-  // ENHANCED: Professional status colors
+  // status colors
   const getStatusColor = (status) => {
     const colors = {
       active: { bg: '#dcfce7', text: '#166534', border: '#bbf7d0' },
@@ -86,7 +83,6 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
     return colors[status] || colors.inactive;
   };
 
-  // ENHANCED: Professional priority colors
   const getPriorityColor = (priority) => {
     const colors = {
       critical: { bg: '#fef2f2', text: '#991b1b', border: '#fecaca' },
@@ -97,13 +93,11 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
     return colors[priority] || colors.medium;
   };
 
-  // KEEP: Your existing date formatter exactly as is
   const formatDate = (dateString) => {
     if (!dateString) return 'Never';
     return new Date(dateString).toLocaleDateString();
   };
 
-  // KEEP: Your existing clear filters logic
   const handleClearFilters = () => {
     setSearchTerm('');
     setStatusFilter('');
@@ -111,7 +105,6 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
     setCurrentPage(1);
   };
 
-  // Professional loading state
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
@@ -123,7 +116,7 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
 
   return (
     <div style={styles.container}>
-      {/* Professional Header */}
+      {/* Header */}
       <div style={styles.header}>
         <div style={styles.headerLeft}>
           <h2 style={styles.title}>Clients</h2>
@@ -138,7 +131,7 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
         </button>
       </div>
 
-      {/* Professional Filters */}
+      {/* Filters */}
       <div style={styles.filtersContainer}>
         <div style={styles.searchContainer}>
           <Search size={20} style={styles.searchIcon} />
@@ -186,7 +179,7 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
         </div>
       </div>
 
-      {/* Professional Error Message */}
+      {/* Error Message */}
       {error && (
         <div style={styles.errorContainer}>
           <p style={styles.errorText}>{error}</p>
@@ -334,7 +327,7 @@ const ClientList = ({ onClientSelect, onClientEdit, onClientAdd }) => {
         </table>
       </div>
 
-      {/* Professional Pagination */}
+      {/* Pagination */}
       {pagination.totalPages > 1 && (
         <div style={styles.paginationContainer}>
           <div style={styles.paginationInfo}>
@@ -786,7 +779,6 @@ const styles = {
   }
 };
 
-// Add CSS animations and hover effects
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
   @keyframes spin {

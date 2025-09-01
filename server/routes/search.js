@@ -1,5 +1,3 @@
-// Create server/routes/search.js
-
 const express = require('express');
 const router = express.Router();
 const Client = require('../models/Client');

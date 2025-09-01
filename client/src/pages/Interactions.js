@@ -1,5 +1,3 @@
-// 📁 client/src/pages/Interactions.js
-// Your existing functionality with professional styling upgrade
 import React, { useState } from 'react';
 import InteractionList from '../components/InteractionList';
 import InteractionForm from '../components/InteractionForm';
@@ -16,12 +14,10 @@ import {
 } from 'lucide-react';
 
 const Interactions = () => {
-  // KEEP: All your existing state exactly as is
   const [showForm, setShowForm] = useState(false);
   const [editingInteraction, setEditingInteraction] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // KEEP: All your existing handlers exactly as they are
   const handleNewInteraction = () => {
     setEditingInteraction(null);
     setShowForm(true);
@@ -44,10 +40,9 @@ const Interactions = () => {
   };
 
   const handleInteractionDelete = () => {
-    setRefreshTrigger(prev => prev + 1); // Trigger refresh
+    setRefreshTrigger(prev => prev + 1); 
   };
 
-  // KEEP: Your existing form display logic
   if (showForm) {
     return (
       <div style={styles.formContainer}>
@@ -62,7 +57,7 @@ const Interactions = () => {
 
   return (
     <div style={styles.container}>
-      {/* Professional Header Section */}
+      {/* Header Section */}
       <div style={styles.header}>
         <div style={styles.headerLeft}>
           <div style={styles.titleSection}>
@@ -86,7 +81,7 @@ const Interactions = () => {
           </button>
           <button 
             style={styles.addButton}
-            onClick={handleNewInteraction} // KEEP: Your existing function
+            onClick={handleNewInteraction} 
           >
             <Plus size={20} />
             New Interaction
@@ -94,7 +89,7 @@ const Interactions = () => {
         </div>
       </div>
 
-      {/* Professional Stats Overview */}
+      {/* Stats Overview */}
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
           <div style={{...styles.statIcon, backgroundColor: '#dbeafe'}}>
@@ -188,9 +183,7 @@ const Interactions = () => {
         </div>
       </div>
 
-      {/* Professional Content Wrapper */}
       <div style={styles.contentWrapper}>
-        {/* KEEP: Your existing InteractionList component with all functionality */}
         <InteractionList
           onInteractionEdit={handleEditInteraction} // KEEP: Your existing handlers
           onInteractionDelete={handleInteractionDelete}
